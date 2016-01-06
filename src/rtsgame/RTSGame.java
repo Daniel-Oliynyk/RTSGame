@@ -6,8 +6,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 public class RTSGame extends Game {
-    Ship mothership;
-    Group stars;
+    Group stars, ships;
     BufferedImage star;
     int starCooldown;
     
@@ -18,14 +17,17 @@ public class RTSGame extends Game {
     
     @Override
     protected void window() {
-        setTitle("RTS Game");
+        setTitle("Strategy Game");
         setBackground(new Color(0x0b1037));
         create();
     }
     
     @Override
     protected void setup() {
-        mothership = new Ship();
+        ships = new Group();
+        ships.add(new Ship());
+        ships.add(new Ship());
+        ships.add(new Ship());
         star = loadImage("img/star.png");
         stars = new Group();
         for (int i = 0; i < 200; i++) stars.add(new Sprite(randomPosition(getArea()), star));
@@ -34,14 +36,13 @@ public class RTSGame extends Game {
     
     @Override
     protected void run() {
-        mothership.draw();
+        ships.drawAll();
         starCooldown--;
         if (starCooldown < 0) {
             stars.remove(stars.get(0));
             stars.add(new Sprite(randomPosition(getArea()), star));
             starCooldown = 3;
         }
-        
         for (Sprite dot : stars.getAll()) {
             if (dot.getX() < -dot.getWidth()) dot.setX(dot.getX() + getWidth());
             else if (dot.getX() > getWidth()) dot.setX(dot.getX() - getWidth());
@@ -49,5 +50,10 @@ public class RTSGame extends Game {
             else if (dot.getY() > getHeight()) dot.setY(dot.getY() - getHeight());
         }
         stars.drawAll();
+        drawGrid();
+    }
+    
+    static void drawGrid() {
+        for (int i = 0; i < getWidth(); i += 20) painter().drawLine(0, i, getHeight(), i);
     }
 }
