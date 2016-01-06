@@ -1,8 +1,28 @@
 package rtsgame;
 
-public class RTSGame {
+import gametools.*;
+import static gametools.Tools.*;
+
+public class RTSGame extends Game {
     
     public static void main(String[] args) {
-//        This better work omg
+        initialize(RTSGame.class);
+        new RTSGame();
+    }
+    
+    @Override
+    protected void window() {
+        setTitle("RTS Game");
+        create();
+    }
+    
+    @Override
+    protected void setup() {
+        
+    }
+    
+    @Override
+    protected void run() {
+        
     }
 }
