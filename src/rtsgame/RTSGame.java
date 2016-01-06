@@ -4,6 +4,7 @@ import gametools.*;
 import static gametools.Tools.*;
 
 public class RTSGame extends Game {
+    Ship mothership;
     
     public static void main(String[] args) {
         initialize(RTSGame.class);
@@ -18,11 +19,11 @@ public class RTSGame extends Game {
     
     @Override
     protected void setup() {
-        
+        mothership = new Ship();
     }
     
     @Override
     protected void run() {
-        
+        mothership.draw();
     }
 }
