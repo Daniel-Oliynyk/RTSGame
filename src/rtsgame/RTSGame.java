@@ -6,7 +6,6 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 public class RTSGame extends Game {
-    public static final int GRID_SIZE = 64;
     Group stars, ships;
     BufferedImage star;
     int starCooldown;
@@ -51,5 +50,10 @@ public class RTSGame extends Game {
         }
         stars.drawAll();
         ships.drawAll();
+        
+        boolean allComplete = true;
+        for (Sprite ship : ships.getAll()) if (!((Ship) ship).turnComplete) allComplete = false;
+        
+        if (allComplete) for (Sprite ship : ships.getAll()) ((Ship) ship).resetTurn();
     }
 }
