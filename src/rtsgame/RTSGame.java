@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 public class RTSGame extends Game {
+    public static final int GRID_SIZE = 64;
     Group stars, ships;
     BufferedImage star;
     int starCooldown;
@@ -25,9 +26,9 @@ public class RTSGame extends Game {
     @Override
     protected void setup() {
         ships = new Group();
-        ships.add(new Ship());
-        ships.add(new Ship());
-        ships.add(new Ship());
+        ships.add(new Ship(pt(128 + 32, 128 + 32)));
+        ships.add(new Ship(pt(256 + 32, 64 + 32)));
+        ships.add(new Ship(pt(512 + 32, 512 + 32)));
         star = loadImage("img/star.png");
         stars = new Group();
         for (int i = 0; i < 200; i++) stars.add(new Sprite(randomPosition(getArea()), star));
@@ -50,10 +51,5 @@ public class RTSGame extends Game {
             else if (dot.getY() > getHeight()) dot.setY(dot.getY() - getHeight());
         }
         stars.drawAll();
-        drawGrid();
-    }
-    
-    static void drawGrid() {
-        for (int i = 0; i < getWidth(); i += 20) painter().drawLine(0, i, getHeight(), i);
     }
 }

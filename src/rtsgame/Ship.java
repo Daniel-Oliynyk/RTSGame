@@ -8,9 +8,9 @@ public class Ship extends Sprite {
     boolean selected, moving;
     Position moveTo = Game.getCenter();
     
-    public Ship() {
+    public Ship(Position pos) {
         super(loadImage("img/mothership.png"));
-        centerOn(randomPosition(Game.getArea()));
+        centerOn(pos);
     }
     
     @Override
@@ -24,8 +24,6 @@ public class Ship extends Sprite {
                 endX = centerX + (int) (Math.cos(getCenter().angleTo(Game.mousePosition())) * RANGE);
                 endY = centerY + (int) (Math.sin(getCenter().angleTo(Game.mousePosition())) * RANGE);
             }
-            endX = endX - (endX % 20);
-            endY = endY - (endY % 20);
             Game.painter().drawLine(centerX, centerY, endX, endY);
             new Position(endX, endY).draw(5);
             if (Game.mouseReleased()) {
