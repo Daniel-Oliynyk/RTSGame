@@ -2,6 +2,7 @@ package rtsgame;
 
 import gametools.*;
 import static gametools.Tools.*;
+import java.awt.event.MouseEvent;
 
 public class Ship extends Sprite {
     static final int RANGE = 150;
@@ -15,7 +16,6 @@ public class Ship extends Sprite {
     
     @Override
     protected void update() {
-        if (Game.mouseEngaged() && Game.mouseWithin(this)) selected = !selected;
         if (selected) {
             int centerX = (int) getCenter().x(), centerY = (int) getCenter().y();
             Game.painter().drawOval(centerX - RANGE, centerY - RANGE, RANGE * 2, RANGE * 2);
@@ -26,12 +26,14 @@ public class Ship extends Sprite {
             }
             Game.painter().drawLine(centerX, centerY, endX, endY);
             new Position(endX, endY).draw(5);
-            if (Game.mouseReleased()) {
+            if (Game.mouseEngaged(MouseEvent.BUTTON1)) {
                 moveTo = new Position(endX, endY);
                 selected = false;
                 moving = true;
             }
         }
+        if (Game.mouseEngaged(MouseEvent.BUTTON1) && Game.mouseWithin(this)) selected = true;
+        else if (Game.mouseEngaged(MouseEvent.BUTTON3)) selected = false;
         if (moving) moveTo(moveTo);
     }
     

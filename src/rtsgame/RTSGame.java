@@ -37,7 +37,6 @@ public class RTSGame extends Game {
     
     @Override
     protected void run() {
-        ships.drawAll();
         starCooldown--;
         if (starCooldown < 0) {
             stars.remove(stars.get(0));
@@ -51,5 +50,6 @@ public class RTSGame extends Game {
             else if (dot.getY() > getHeight()) dot.setY(dot.getY() - getHeight());
         }
         stars.drawAll();
+        ships.drawAll();
     }
 }
