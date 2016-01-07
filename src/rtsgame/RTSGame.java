@@ -52,8 +52,7 @@ public class RTSGame extends Game {
         ships.drawAll();
         
         boolean allComplete = true;
-        for (Sprite ship : ships.getAll()) if (!((Ship) ship).turnComplete) allComplete = false;
-        
+        for (Sprite ship : ships.getAll()) if (!((Ship) ship).turnComplete()) allComplete = false;
         if (allComplete) for (Sprite ship : ships.getAll()) ((Ship) ship).resetTurn();
     }
 }
