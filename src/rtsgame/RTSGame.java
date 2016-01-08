@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 public class RTSGame extends Game {
     Group stars, ships;
     static BufferedImage star, bullet;
+    static Group bullets;
     int starCooldown;
     
     public static void main(String[] args) {
@@ -32,6 +33,9 @@ public class RTSGame extends Game {
         star = loadImage("img/star.png");
         bullet = loadImage("img/bullet.png");
         
+        bullets = new Group();
+        bullets.removeWhenOffScreen();
+        
         stars = new Group();
         for (int i = 0; i < 200; i++) stars.add(new Sprite(randomPosition(getArea()), star));
         starCooldown = 0;
@@ -51,6 +55,7 @@ public class RTSGame extends Game {
             if (dot.getY() < -dot.getHeight()) dot.setY(dot.getY() + getHeight());
             else if (dot.getY() > getHeight()) dot.setY(dot.getY() - getHeight());
         }
+        bullets.drawAll();
         stars.drawAll();
         ships.drawAll();
         

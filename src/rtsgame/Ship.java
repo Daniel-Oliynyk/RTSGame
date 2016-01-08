@@ -10,14 +10,12 @@ public class Ship extends Sprite {
     int turnRange = RANGE;
     boolean moveSelected, shootSelected, arrived = true;
     int turns = 2;
-    Group bullets;
     Position moveLocation;
     
     public Ship(Position pos) {
         super(loadImage("img/mothership.png"));
         centerOn(pos);
         setRotationSpeed(20);
-        bullets = new Group();
         moveLocation = getCenter();
     }
     
@@ -54,17 +52,7 @@ public class Ship extends Sprite {
             new Position(endX, endY).draw(5);
             Game.painter().setColor(Color.WHITE);
             if (Game.mouseEngaged(MouseEvent.BUTTON1) || Game.mouseEngaged(MouseEvent.BUTTON2)) {
-                Sprite bullet = new Sprite(RTSGame.bullet);
-                bullet.centerOn(this);
-                bullet.face(Game.mousePosition());
-                bullet.setRelationalMovement(true);
-                bullet.script(new Script(bullet) {
-                    @Override
-                    public void update() {
-                        sprite().move(Direction.EAST);
-                    }
-                });
-                bullets.add(bullet);
+                RTSGame.bullets.add(new Bullet(getCenter(), Game.mousePosition()));
                 turns--;
                 if (turns < 1) shootSelected = false;
             }
@@ -98,7 +86,6 @@ public class Ship extends Sprite {
     
     @Override
     public void draw(UpdateType type) {
-        if (type.draw()) bullets.drawAll();
         super.draw(type);
         if (type.draw()) {
             int newX = (int) (getCenter().x() + ORIGINAL_SIZE / 2);
