@@ -6,17 +6,18 @@ import java.awt.Color;
 import java.awt.event.MouseEvent;
 
 public class Ship extends Sprite {
-    static final int RANGE = 300;
+    static final int RANGE = 400;
     int turnRange = RANGE;
-    boolean moveSelected, shootSelected, moving;
+    boolean moveSelected, shootSelected, arrived = true;
     int turns = 2;
     Group bullets;
-    Position lastLocation = Game.getCenter(), moveLocation = Game.getCenter();
+    Position moveLocation;
     
     public Ship(Position pos) {
         super(loadImage("img/mothership.png"));
         centerOn(pos);
         bullets = new Group();
+        moveLocation = getCenter();
     }
     
     @Override
@@ -38,8 +39,8 @@ public class Ship extends Sprite {
             new Position(endX, endY).draw(5);
             if (Game.mouseEngaged(MouseEvent.BUTTON1)) {
                 moveLocation = new Position(endX, endY);
+                face(moveLocation);
                 moveSelected = false;
-                moving = true;
                 turnRange -= getCenter().dist(moveLocation);
                 if (turns > 1 && turnRange < RANGE / 2) turns--;
                 turns--;
@@ -50,7 +51,7 @@ public class Ship extends Sprite {
             Game.painter().drawLine(centerX, centerY, endX, endY);
             new Position(endX, endY).draw(5);
             Game.painter().setColor(Color.WHITE);
-            if (Game.mouseEngaged()) {
+            if (Game.mouseEngaged(MouseEvent.BUTTON1) || Game.mouseEngaged(MouseEvent.BUTTON2)) {
                 Sprite bullet = new Sprite(RTSGame.bullet);
                 bullet.centerOn(this);
                 bullet.face(Game.mousePosition());
@@ -79,12 +80,13 @@ public class Ship extends Sprite {
             moveSelected = false;
             shootSelected = false;
         }
-        if (moving) moveTo(moveLocation);
-        lastLocation = getCenter();
+//        if (angl) moveTo(moveLocation);
+        if (moveLocation.x() == getCenter().x() && moveLocation.y() == getCenter().y()) arrived = true;
+        else arrived = false;
     }
     
     boolean turnComplete() {
-        return turns < 1 && getCenter().x() == lastLocation.x() && getCenter().y() == lastLocation.y();
+        return turns < 1 && arrived;
     }
     
     void resetTurn() {
