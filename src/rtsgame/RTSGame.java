@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 
 public class RTSGame extends Game {
     Group stars, ships;
-    BufferedImage star;
+    static BufferedImage star, bullet;
     int starCooldown;
     
     public static void main(String[] args) {
@@ -28,7 +28,10 @@ public class RTSGame extends Game {
         ships.add(new Ship(pt(128 + 32, 128 + 32)));
         ships.add(new Ship(pt(256 + 32, 64 + 32)));
         ships.add(new Ship(pt(512 + 32, 512 + 32)));
+        
         star = loadImage("img/star.png");
+        bullet = loadImage("img/bullet.png");
+        
         stars = new Group();
         for (int i = 0; i < 200; i++) stars.add(new Sprite(randomPosition(getArea()), star));
         starCooldown = 0;
