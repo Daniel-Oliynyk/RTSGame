@@ -6,7 +6,7 @@ import java.awt.Color;
 import java.awt.event.MouseEvent;
 
 public class Ship extends Sprite {
-    static final int RANGE = 400;
+    static final int RANGE = 400, ORIGINAL_SIZE = 128;
     int turnRange = RANGE;
     boolean moveSelected, shootSelected, arrived = true;
     int turns = 2;
@@ -16,6 +16,7 @@ public class Ship extends Sprite {
     public Ship(Position pos) {
         super(loadImage("img/mothership.png"));
         centerOn(pos);
+        setRotationSpeed(20);
         bullets = new Group();
         moveLocation = getCenter();
     }
@@ -25,6 +26,7 @@ public class Ship extends Sprite {
         int centerX = (int) getCenter().x(), centerY = (int) getCenter().y();
         int endX = (int) Game.mousePosition().x(), endY = (int) Game.mousePosition().y();
         if (moveSelected) {
+            face(Game.mousePosition());
             int tempRange = turns < 2? turnRange / 2 : turnRange;
             if (turns > 1) {
                 Game.painter().drawOval(centerX - RANGE / 2, centerY - RANGE / 2, RANGE, RANGE);
@@ -39,7 +41,6 @@ public class Ship extends Sprite {
             new Position(endX, endY).draw(5);
             if (Game.mouseEngaged(MouseEvent.BUTTON1)) {
                 moveLocation = new Position(endX, endY);
-                face(moveLocation);
                 moveSelected = false;
                 turnRange -= getCenter().dist(moveLocation);
                 if (turns > 1 && turnRange < RANGE / 2) turns--;
@@ -47,6 +48,7 @@ public class Ship extends Sprite {
             }
         }
         else if (shootSelected) {
+            face(Game.mousePosition());
             Game.painter().setColor(Color.RED);
             Game.painter().drawLine(centerX, centerY, endX, endY);
             new Position(endX, endY).draw(5);
@@ -68,11 +70,11 @@ public class Ship extends Sprite {
             }
         }
         
-        if (Game.mouseEngaged(MouseEvent.BUTTON1) && Game.mouseWithin(this) && turns > 0) {
+        if (Game.mouseEngaged(MouseEvent.BUTTON1) && Game.mouseWithin(this) && turns > 0 && arrived) {
             moveSelected = true;
             shootSelected = false;
         }
-        else if (Game.mouseEngaged(MouseEvent.BUTTON2) && Game.mouseWithin(this) && turns > 0) {
+        else if (Game.mouseEngaged(MouseEvent.BUTTON2) && Game.mouseWithin(this) && turns > 0 && arrived) {
             moveSelected = false;
             shootSelected = true;
         }
@@ -80,7 +82,7 @@ public class Ship extends Sprite {
             moveSelected = false;
             shootSelected = false;
         }
-//        if (angl) moveTo(moveLocation);
+        if (!arrived) moveTo(moveLocation);
         if (moveLocation.x() == getCenter().x() && moveLocation.y() == getCenter().y()) arrived = true;
         else arrived = false;
     }
@@ -98,6 +100,10 @@ public class Ship extends Sprite {
     public void draw(UpdateType type) {
         if (type.draw()) bullets.drawAll();
         super.draw(type);
-        if (type.draw()) Game.painter().drawString(turns + "", (int) (x + getWidth()), (int) (y + getHeight()));
+        if (type.draw()) {
+            int newX = (int) (getCenter().x() + ORIGINAL_SIZE / 2);
+            int newY = (int) (getCenter().y() + ORIGINAL_SIZE / 2);
+            Game.painter().drawString(turns + "", newX, newY);
+        }
     }
 }
