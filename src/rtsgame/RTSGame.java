@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 
 public class RTSGame extends Game {
     Group stars, ships;
-    static BufferedImage star, bullet;
+    static BufferedImage star, bullet, move, shoot, cancel;
     static Group bullets;
     int starCooldown;
     
@@ -32,6 +32,10 @@ public class RTSGame extends Game {
         
         star = loadImage("img/star.png");
         bullet = loadImage("img/bullet.png");
+        
+        move = loadImage("img/actions/move.png");
+        shoot = loadImage("img/actions/shoot.png");
+        cancel = loadImage("img/actions/cancel.png");
         
         bullets = new Group();
         bullets.removeWhenOffScreen();
