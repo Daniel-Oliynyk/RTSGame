@@ -11,7 +11,7 @@ public class Bullet extends Sprite {
         centerOn(center);
         face(target);
         this.target = target;
-        setSpeed(8);
+        setSpeed(12);
     }
     
     @Override
