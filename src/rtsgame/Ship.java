@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage;
 
 public class Ship extends Sprite {
     final int RANGE, ORIGINAL_SIZE;
-    int totalRange, mode, turns = 2;
+    int totalRange, mode = 1, turns = 2;
     boolean selected, arrived = true;
     Position moveLocation;
     
@@ -24,36 +24,31 @@ public class Ship extends Sprite {
     @Override
     protected final void update() {
         if (selected) {
-            /*if (Game.keyEngaged(KeyEvent.VK_1)) mode = 1;
+            if (Game.keyEngaged(KeyEvent.VK_1)) mode = 1;
             if (Game.keyEngaged(KeyEvent.VK_2)) mode = 2;
             if (Game.keyEngaged(KeyEvent.VK_3)) mode = 3;
-            if (Game.keyEngaged(KeyEvent.VK_4)) mode = 4;*/
+            if (Game.keyEngaged(KeyEvent.VK_4)) mode = 4;
             if (arrived) selected(mode);
         }
         if (!arrived) moveTo(moveLocation);
         arrived = moveLocation.x() == getCenter().x() && moveLocation.y() == getCenter().y();
-        
-        if (Game.mouseEngaged(MouseEvent.BUTTON1) && Game.mouseWithin(this) && arrived && turns > 0) {
-            selected = true;
-            RTSGame.showMenu(this);
-        }
+        if (Game.mouseEngaged(MouseEvent.BUTTON1) && Game.mouseWithin(this) && arrived && turns > 0) selected = true;
         painter().setColor(Color.WHITE);
-        painter().drawString(turns + "", (int) (getCenter().y() + ORIGINAL_SIZE / 2), (int) (getCenter().x() + ORIGINAL_SIZE / 2));
+        painter().drawString(turns + "", (int) (getCenter().x() + ORIGINAL_SIZE / 2), (int) (getCenter().y() + ORIGINAL_SIZE / 2));
     }
     
     protected void selected(int mode) {
         face(Game.mousePosition());
         if (mode == 1) {
             painter().setColor(Color.GREEN);
-            int turnRange = turns < 2? totalRange / 2 : totalRange;
             if (turns > 1) {
                 drawRange(RANGE / 2);
                 drawRange(RANGE);
             }
-            else drawRange(turnRange);
-            drawPointer(mouseConstraint(turnRange));
-            if (Game.mouseEngaged(MouseEvent.BUTTON1) && !Game.mouseWithin(RTSGame.menu)) {
-                moveLocation = mouseConstraint(turnRange);
+            else drawRange(totalRange);
+            drawPointer(mouseConstraint(totalRange));
+            if (Game.mouseEngaged()) {
+                moveLocation = mouseConstraint(totalRange);
                 totalRange -= getCenter().dist(moveLocation);
                 if (turns > 1 && totalRange < RANGE / 2) turns -= 2;
                 else turns--;
@@ -65,7 +60,7 @@ public class Ship extends Sprite {
             painter().setColor(Color.RED);
             drawPointer(Game.mousePosition());
             painter().setColor(Color.WHITE);
-            if (Game.mouseEngaged(MouseEvent.BUTTON1) && !Game.mouseWithin(RTSGame.menu)) {
+            if (Game.mouseEngaged()) {
                 RTSGame.bullets.add(new Bullet(getCenter(), Game.mousePosition()));
                 turns--;
                 if (turns < 1) deselect();
@@ -74,6 +69,7 @@ public class Ship extends Sprite {
     }
     
     Position mouseConstraint(double length) {
+        if (getCenter().dist(Game.mousePosition()) < length) return Game.mousePosition();
         double mX = getCenter().x() + Math.cos(getCenter().angleTo(Game.mousePosition())) * length;
         double mY = getCenter().y() + Math.sin(getCenter().angleTo(Game.mousePosition())) * length;
         return new Position(mX, mY);
@@ -81,7 +77,7 @@ public class Ship extends Sprite {
     
     void drawRange(int range) {
         int centerX = (int) getCenter().x(), centerY = (int) getCenter().y();
-        painter().drawOval(centerX - range / 2, centerY - range / 2, range, range);
+        painter().drawOval(centerX - range, centerY - range, range * 2, range * 2);
     }
     
     void drawPointer(Position pointer) {
@@ -101,6 +97,5 @@ public class Ship extends Sprite {
     void deselect() {
         selected = false;
         mode = 0;
-        RTSGame.hideMenu();
     }
 }

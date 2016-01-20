@@ -84,42 +84,4 @@ public class RTSGame extends Game {
         setPainterPosition(getCenter());
         menu.drawAll();
     }
-    
-    static void showMenu(Ship owner) {
-        menu.clear(false);
-        Sprite moveButton = new Sprite(move);
-        moveButton.centerOn(getCenter().x() - moveButton.getWidth() - 8, getHeight() - moveButton.getHeight() / 2 - 8);
-        moveButton.script(new Script() {
-            @Override
-            public void update() {
-                if ((mouseEngaged() && mouseWithin(moveButton)) || keyEngaged(KeyEvent.VK_1)) owner.mode = 0;
-            }
-        });
-        menu.add(moveButton);
-        Sprite shootButton = new Sprite(shoot);
-        shootButton.centerOn(getCenter().x(), getHeight() - shootButton.getHeight() / 2 - 8);
-        shootButton.script(new Script() {
-            @Override
-            public void update() {
-                if ((mouseEngaged() && mouseWithin(shootButton)) || keyEngaged(KeyEvent.VK_2)) owner.mode = 1;
-            }
-        });
-        menu.add(shootButton);
-        Sprite cancelButton = new Sprite(cancel);
-        cancelButton.centerOn(getCenter().x() + cancelButton.getWidth() + 8, getHeight() - cancelButton.getHeight() / 2 - 8);
-        cancelButton.script(new Script() {
-            @Override
-            public void update() {
-                if ((mouseEngaged() && mouseWithin(cancelButton)) || keyEngaged(KeyEvent.VK_3) || mouseEngaged(MouseEvent.BUTTON3)) {
-                    owner.deselect();
-                    hideMenu();
-                }
-            }
-        });
-        menu.add(cancelButton);
-    }
-    
-    static void hideMenu() {
-        menu = new Group();
-    }
 }
