@@ -1,83 +1,88 @@
 package rtsgame;
 
 import gametools.*;
-import static gametools.Tools.*;
 import static gametools.Game.painter;
 import java.awt.Color;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 
 public class Ship extends Sprite {
-    static final int RANGE = 300, ORIGINAL_SIZE = 128;
-    static enum Select {
-        MOVE, SHOOT/*, NONE*/;
-    }
-    int turnRange = RANGE;
+    final int RANGE, ORIGINAL_SIZE;
+    int totalRange, mode = 1, turns = 2;
     boolean selected, arrived = true;
-    Select type = Select./*NONE*/MOVE;
-    int turns = 2;
     Position moveLocation;
     
-    public Ship(Position pos) {
-        super(loadImage("img/mothership.png"));
-        centerOn(pos);
-        setRotationSpeed(20);
+    public Ship(double x, double y, int range, BufferedImage image) {
+        super(image);
+        centerOn(x, y);
         moveLocation = getCenter();
+        RANGE = totalRange = range;
+        ORIGINAL_SIZE = image.getWidth();
     }
     
     @Override
-    protected void update() {
-        int centerX = (int) getCenter().x(), centerY = (int) getCenter().y();
-        int endX = (int) Game.mousePosition().x(), endY = (int) Game.mousePosition().y();
+    protected final void update() {
         if (selected) {
-            face(Game.mousePosition());
-            if (type == Select.MOVE) {
-                painter().setColor(Color.GREEN);
-                int tempRange = turns < 2? turnRange / 2 : turnRange;
-                if (turns > 1) {
-                    painter().drawOval(centerX - RANGE / 2, centerY - RANGE / 2, RANGE, RANGE);
-                    painter().drawOval(centerX - RANGE, centerY - RANGE, RANGE * 2, RANGE * 2);
-                }
-                else painter().drawOval(centerX - tempRange, centerY - tempRange, tempRange * 2, tempRange * 2);
-                if (getCenter().dist(Game.mousePosition()) > tempRange) {
-                    endX = centerX + (int) (Math.cos(getCenter().angleTo(Game.mousePosition())) * tempRange);
-                    endY = centerY + (int) (Math.sin(getCenter().angleTo(Game.mousePosition())) * tempRange);
-                }
-                painter().drawLine(centerX, centerY, endX, endY);
-                new Position(endX, endY).draw(5);
-                if (Game.mouseEngaged(MouseEvent.BUTTON1) && !Game.mouseWithin(RTSGame.menu)) {
-                    moveLocation = new Position(endX, endY);
-                    turnRange -= getCenter().dist(moveLocation);
-                    if (turns > 1 && turnRange < RANGE / 2) turns--;
-                    turns--;
-                    if (turns < 1) deselect();
-                }
-            }
-            else if (type == Select.SHOOT) {
-                painter().setColor(Color.RED);
-                painter().drawLine(centerX, centerY, endX, endY);
-                new Position(endX, endY).draw(5);
-                painter().setColor(Color.WHITE);
-                if (Game.mouseEngaged(MouseEvent.BUTTON1) && !Game.mouseWithin(RTSGame.menu)) {
-                    RTSGame.bullets.add(new Bullet(getCenter(), Game.mousePosition()));
-                    turns--;
-                    if (turns < 1) deselect();
-                }
-            }
+            if (Game.keyEngaged(KeyEvent.VK_1)) mode = 1;
+            if (Game.keyEngaged(KeyEvent.VK_2)) mode = 2;
+            if (Game.keyEngaged(KeyEvent.VK_3)) mode = 3;
+            if (Game.keyEngaged(KeyEvent.VK_4)) mode = 4;
+            if (arrived) selected(mode);
         }
-        painter().setColor(Color.WHITE);
-        
-        if (Game.mouseEngaged(MouseEvent.BUTTON1) && Game.mouseWithin(this) && arrived && turns > 0) {
-            selected = true;
-            RTSGame.showMenu(this);
-        }
-        
         if (!arrived) moveTo(moveLocation);
-        if (moveLocation.x() == getCenter().x() && moveLocation.y() == getCenter().y()) arrived = true;
-        else arrived = false;
-        
-        int bottom = (int) (getCenter().y() + ORIGINAL_SIZE / 2);
-        int right = (int) (getCenter().x() + ORIGINAL_SIZE / 2);
-        painter().drawString(turns + "", right, bottom);
+        arrived = moveLocation.x() == getCenter().x() && moveLocation.y() == getCenter().y();
+        if (Game.mouseEngaged(MouseEvent.BUTTON1) && Game.mouseWithin(this) && arrived && turns > 0) selected = true;
+        painter().setColor(Color.WHITE);
+        painter().drawString(turns + "", (int) (getCenter().x() + ORIGINAL_SIZE / 2), (int) (getCenter().y() + ORIGINAL_SIZE / 2));
+    }
+    
+    protected void selected(int mode) {
+        face(Game.mousePosition());
+        if (mode == 1) {
+            painter().setColor(Color.GREEN);
+            if (turns > 1) {
+                drawRange(RANGE / 2);
+                drawRange(RANGE);
+            }
+            else drawRange(totalRange);
+            drawPointer(mouseConstraint(totalRange));
+            if (Game.mouseEngaged()) {
+                moveLocation = mouseConstraint(totalRange);
+                totalRange -= getCenter().dist(moveLocation);
+                if (turns > 1 && totalRange < RANGE / 2) turns -= 2;
+                else turns--;
+                if (turns < 1) deselect();
+                totalRange /= 2;
+            }
+        }
+        else if (mode == 2) {
+            painter().setColor(Color.RED);
+            drawPointer(Game.mousePosition());
+            painter().setColor(Color.WHITE);
+            if (Game.mouseEngaged()) {
+                RTSGame.bullets.add(new Bullet(getCenter(), Game.mousePosition()));
+                turns--;
+                if (turns < 1) deselect();
+            }
+        }
+    }
+    
+    Position mouseConstraint(double length) {
+        if (getCenter().dist(Game.mousePosition()) < length) return Game.mousePosition();
+        double mX = getCenter().x() + Math.cos(getCenter().angleTo(Game.mousePosition())) * length;
+        double mY = getCenter().y() + Math.sin(getCenter().angleTo(Game.mousePosition())) * length;
+        return new Position(mX, mY);
+    }
+    
+    void drawRange(int range) {
+        int centerX = (int) getCenter().x(), centerY = (int) getCenter().y();
+        painter().drawOval(centerX - range, centerY - range, range * 2, range * 2);
+    }
+    
+    void drawPointer(Position pointer) {
+        painter().drawLine((int) getCenter().x(), (int) getCenter().y(), (int) pointer.x(), (int) pointer.y());
+        pointer.draw(5);
     }
     
     boolean turnComplete() {
@@ -86,12 +91,11 @@ public class Ship extends Sprite {
     
     void resetTurn() {
         turns = 2;
-        turnRange = RANGE;
+        totalRange = RANGE;
     }
     
     void deselect() {
         selected = false;
-        type = Select./*NONE*/MOVE;
-        RTSGame.hideMenu();
+        mode = 0;
     }
 }
