@@ -4,14 +4,13 @@ import gametools.*;
 import static gametools.Tools.*;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 public class RTSGame extends Game {
     static final int PAN_SPEED = 10;
     static BufferedImage star, bullet, move, shoot, cancel;
-    static Group bullets, menu;
-    Group stars, ships;
+    static Group bullets, menu, ships;
+    private Group stars;
     int starCooldown;
     Position prevPainter;
     
