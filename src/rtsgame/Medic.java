@@ -7,13 +7,15 @@ import java.awt.Color;
 public class Medic extends Ship {
 
     public Medic(double x, double y) {
-        super(x, y, 150, 3, 2, loadImage("img/ship/medic.png"));
+        super(x, y, 150, 2, 3, loadImage("img/ship/medic.png"));
+        shipInformation("Repair Ship", "Move", "Repair", "Shoot");
     }
 
     @Override
     protected void actionTwo() {
+        face(mouse());
         painter().setColor(Color.CYAN);
-        drawBoth(100);
+        drawRangePointer(100);
         if (click()) decreaseTurns(1);
     }
     
@@ -24,8 +26,9 @@ public class Medic extends Ship {
             actionTwo();
         }
         else {
+            face(mouse());
             painter().setColor(Color.GREEN);
-            drawBoth(400);
+            drawRangePointer(300);
             if (click()) {
                 RTSGame.bullets.add(new Bullet(getCenter(), mouseConstraint(400)));
                 decreaseTurns(getTurns());

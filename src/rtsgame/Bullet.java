@@ -16,7 +16,13 @@ public class Bullet extends Sprite {
     
     @Override
     protected void update() {
-        moveTo(target);
-        if (getCenter().x() == target.x() && getCenter().y() == target.y()) remove(true);
+        if (getAnimation().getAllFrames().length < 2) {
+            moveTo(target);
+            if (getCenter().x() == target.x() && getCenter().y() == target.y()) {
+                setAnimation(new Animation(RTSGame.explosion));
+                centerOn(target);
+            }
+        }
+        else if (getAnimation().isComplete()) remove(true);
     }
 }
