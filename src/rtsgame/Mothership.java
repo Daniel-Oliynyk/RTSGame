@@ -10,6 +10,7 @@ public class Mothership extends Ship {
         super(x, y, 100, 2, loadImage("img/ship/mothership.png"));
         shipInformation("Mothership", "Move", "Shoot", "Shield");
         hp = 72;
+        en = 16;
     }
 
     @Override

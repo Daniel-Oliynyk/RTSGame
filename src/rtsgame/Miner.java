@@ -16,11 +16,10 @@ public class Miner extends Ship {
     @Override
     protected void actionTwo() {
         face(mouse());
-        painter().setColor(Color.CYAN);
+        painter().setColor(Color.GREEN);
         drawRangePointer(50);
         if (click()) {
             decreaseTurns(1);
-            en++;
         }
     }
 }

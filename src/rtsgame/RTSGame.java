@@ -30,6 +30,7 @@ public class RTSGame extends Game {
     
     @Override
     protected void window() {
+        setDimensions(1080, 720);
         setTitle("Strategy Game");
         setBackground(new Color(0x0b1037));
         create();
@@ -116,11 +117,6 @@ public class RTSGame extends Game {
             if (!found && !done && ship.selected) {
                 ship.selected = false;
                 found = true;
-                /*if (RTSGame.ships.getAll().indexOf(ship) > RTSGame.ships.size() - 2) {
-                    ((Ship)ships.get(0)).selected = true;
-                    centerPainterOn(((Ship)ships.get(0)));
-                    break;
-                }*/
             }
             else if (found && !done && ship.getTurns() < 1) ship.selected = false;
             else if (found && !done && ship.getTurns() > 0) {
