@@ -8,19 +8,20 @@ import java.awt.Color;
 public class Tank extends Ship {
 
     public Tank(double x, double y) {
-        super(x, y, 150, 1, 2, loadImage("img/ship/tank.png"));
+        super(x, y, 150, 1, loadImage("img/ship/tank.png"));
         shipInformation("Battlecruiser", "Move", "Shoot");
+        hp = 48;
     }
     
     @Override
     protected void actionTwo() {
         face(mouse());
         painter().setColor(Color.RED);
-        drawRangePointer(500);
+        drawRangePointer(300);
         if (click()) {
-            RTSGame.bullets.add(new Bullet(new Position(getCenter().x(), y), mouseConstraint(500)));
-            RTSGame.bullets.add(new Bullet(getCenter(), mouseConstraint(500)));
-            RTSGame.bullets.add(new Bullet(new Position(getCenter().x(), y + getHeight()), mouseConstraint(500)));
+            RTSGame.bullets.add(new Bullet(new Position(getCenter().x(), y), mouseConstraint(300)));
+            RTSGame.bullets.add(new Bullet(getCenter(), mouseConstraint(300)));
+            RTSGame.bullets.add(new Bullet(new Position(getCenter().x(), y + getHeight()), mouseConstraint(300)));
             decreaseTurns(1);
         }
     }

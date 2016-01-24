@@ -3,32 +3,28 @@ package rtsgame;
 import gametools.*;
 import static gametools.Game.painter;
 import java.awt.Color;
-import java.awt.FontMetrics;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class Ship extends Sprite {
-    final int MOVE_RANGE, ORIGINAL_SIZE, ACTION_AMOUNT, MAX_TURNS;
-    final List<String> GLOBAL_ACTIONS = Arrays.asList("Cancel", "Next", "End Turn"),
-            ACTION_KEYS = Arrays.asList("Esc", "Tab", "Enter", "1", "2", "3", "4", "5", "6");
+    final int MOVE_RANGE, ORIGINAL_SIZE, MAX_TURNS;
     private int mode = 1, turns;
+    int hp = 24, en = 8;
     boolean selected, arrived = true;
     private String name = "Ship";
-    private List<String> actions;
+    private List<String> actions = Arrays.asList("Move", "Shoot");
     Position moveLocation;
     
-    public Ship(double x, double y, int range, int turns, int actionAmount, BufferedImage image) {
+    public Ship(double x, double y, int range, int turns, BufferedImage image) {
         super(image);
         centerOn(x, y);
         moveLocation = getCenter();
         MOVE_RANGE = range;
         ORIGINAL_SIZE = image.getWidth();
-        ACTION_AMOUNT = actionAmount < 2? 2 : actionAmount > 6? 6 : actionAmount;
         MAX_TURNS = turns < 1? 1 : turns;
         resetTurn();
     }
@@ -39,10 +35,10 @@ public class Ship extends Sprite {
             if (Game.keyEngaged(KeyEvent.VK_ESCAPE) || Game.mouseEngaged(MouseEvent.BUTTON3)) deselect();
             if (Game.keyEngaged(KeyEvent.VK_1)) mode = 1;
             if (Game.keyEngaged(KeyEvent.VK_2)) mode = 2;
-            if (Game.keyEngaged(KeyEvent.VK_3) && ACTION_AMOUNT > 2) mode = 3;
-            if (Game.keyEngaged(KeyEvent.VK_4) && ACTION_AMOUNT > 3) mode = 4;
-            if (Game.keyEngaged(KeyEvent.VK_5) && ACTION_AMOUNT > 4) mode = 5;
-            if (Game.keyEngaged(KeyEvent.VK_6) && ACTION_AMOUNT > 5) mode = 6;
+            if (Game.keyEngaged(KeyEvent.VK_3) && actions.size() > 2) mode = 3;
+            if (Game.keyEngaged(KeyEvent.VK_4) && actions.size() > 3) mode = 4;
+            if (Game.keyEngaged(KeyEvent.VK_5) && actions.size() > 4) mode = 5;
+            if (Game.keyEngaged(KeyEvent.VK_6) && actions.size() > 5) mode = 6;
             if (arrived) selected();
         }
         if (!arrived) moveTo(moveLocation);
@@ -77,13 +73,7 @@ public class Ship extends Sprite {
     }
     
     protected void actionTwo() {
-        face(mouse());
-        painter().setColor(Color.RED);
-        drawRangePointer(700);
-        if (click()) {
-            RTSGame.bullets.add(new Bullet(getCenter(), mouseConstraint(600)));
-            decreaseTurns(1);
-        }
+        shootRange(400);
     }
     
     protected void actionThree() {}
@@ -94,18 +84,30 @@ public class Ship extends Sprite {
     
     protected void actionSix() {}
     
-    protected final void shipInformation(String... info) {
-        name = info[0];
-        this.actions = new ArrayList<>();
-        this.actions.addAll(GLOBAL_ACTIONS);
-        this.actions.addAll(Arrays.asList(info));
-        this.actions.remove(name);
+    protected final void shootRange(int range) {
+        shootRange(range, Color.RED, 1, 2);
     }
     
-    protected final int stringWidth(String string) {
-        FontMetrics font = painter().getFontMetrics();
-        Rectangle2D rect = font.getStringBounds(string, painter());
-        return (int) rect.getWidth();
+    protected final void shootRange(int range, Color col, int turns, int alt) {
+        if (getTurns() < turns) {
+            setMode(alt);
+            selected();
+        }
+        else {
+            face(mouse());
+            painter().setColor(col);
+            drawRangePointer(range);
+            if (click()) {
+                RTSGame.bullets.add(new Bullet(getCenter(), mouseConstraint(range)));
+                decreaseTurns(turns);
+            }
+        }
+    }
+    
+    protected final void shipInformation(String... info) {
+        name = info[0];
+        this.actions = new ArrayList<>(Arrays.asList(info));
+        this.actions.remove(name);
     }
     
     protected final boolean click() {
@@ -123,31 +125,46 @@ public class Ship extends Sprite {
         return new Position(mX, mY);
     }
     
-    final void drawInformation() {
+    final void drawMenu() {
         Position prev = Game.getPainterCenter();
         Game.centerPainterOn(Game.getCenter());
         painter().setColor(Color.YELLOW);
-        painter().drawString(name, (Game.getWidth() - stringWidth(name)) / 2, Game.getHeight() - 80);
+        painter().drawString(name, (Game.getWidth() - RTSGame.stringWidth(name)) / 2, Game.getHeight() - 90);
         painter().setColor(Color.WHITE);
         int totalWidth = 0;
-        for (String action : actions) totalWidth += stringWidth(action);
-        for (int i = 0; i < actions.size(); i++) totalWidth += stringWidth("[" + ACTION_KEYS.get(i) + "] ");
-        for (int i = 0; i < actions.size() - 1; i++) totalWidth += stringWidth("   ");
+        for (int i = 0; i < actions.size(); i++) totalWidth += RTSGame.stringWidth("[" + (i + 1) + "]  " + actions.get(i));
+        for (int i = 0; i < actions.size() - 1; i++) totalWidth += RTSGame.stringWidth("   ");
         int offset = (Game.getWidth() - totalWidth) / 2;
         for (int i = 0; i < actions.size(); i++) {
             painter().setColor(Color.GRAY);
-            painter().drawString("[" + ACTION_KEYS.get(i) + "] ", offset, Game.getHeight() - 40);
-            offset += stringWidth("[" + ACTION_KEYS.get(i) + "] ");
-            painter().setColor(mode + GLOBAL_ACTIONS.size() - 1 == i? Color.YELLOW : Color.WHITE);
-            painter().drawString(actions.get(i), offset, Game.getHeight() - 40);
-            offset += stringWidth(actions.get(i) + "   ");
+            painter().drawString("[" + (i + 1) + "]  ", offset, Game.getHeight() - 60);
+            offset += RTSGame.stringWidth("[" + (i + 1) + "]  ");
+            painter().setColor(mode - 1 == i? Color.YELLOW : Color.WHITE);
+            painter().drawString(actions.get(i), offset, Game.getHeight() - 60);
+            offset += RTSGame.stringWidth(actions.get(i) + "   ");
         }
         Game.centerPainterOn(prev);
     }
     
-    final void drawTurnCount() {
-        painter().setColor(turns > 0? Color.YELLOW : Color.GRAY);
-        painter().drawString(turns + "", (int) (getCenter().x() + ORIGINAL_SIZE / 2), (int) (getCenter().y() + ORIGINAL_SIZE / 2));
+    final void drawStats() {
+        int bottom = (int) getCenter().y() + ORIGINAL_SIZE / 2;
+        if (selected) {
+            String hs = hp + "H ", es = en + "E ", ts = turns + "T";
+            int offset = (int) getCenter().x() - RTSGame.stringWidth(hs + es + ts) / 2;
+            bottom += 15;
+            painter().setColor(Color.GREEN);
+            painter().drawString(hs, offset, bottom);
+            offset += RTSGame.stringWidth(hs);
+            painter().setColor(Color.CYAN);
+            painter().drawString(es, offset, bottom);
+            offset += RTSGame.stringWidth(es);
+            painter().setColor(Color.YELLOW);
+            painter().drawString(ts, offset, bottom);
+        }
+        else {
+            painter().setColor(turns > 0? Color.YELLOW : Color.GRAY);
+            painter().drawString(turns + "", (int) (getCenter().x() + ORIGINAL_SIZE / 2), (int) (getCenter().y() + ORIGINAL_SIZE / 2));
+        }
     }
     
     protected final void drawRange(int range) {
@@ -188,7 +205,7 @@ public class Ship extends Sprite {
     }
     
     final void setMode(int mode) {
-        this.mode = mode > ACTION_AMOUNT? ACTION_AMOUNT : mode < 2? 2 : mode;
+        this.mode = mode > actions.size()? actions.size() : mode < 1? 1 : mode;
     }
     
     final void decreaseTurns(int amount) {

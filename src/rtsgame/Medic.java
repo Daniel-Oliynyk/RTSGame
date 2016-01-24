@@ -1,13 +1,15 @@
 package rtsgame;
 
+import gametools.Game;
 import static gametools.Game.painter;
 import static gametools.Tools.*;
 import java.awt.Color;
 
 public class Medic extends Ship {
+    final int HEAL_RANGE = 100;
 
     public Medic(double x, double y) {
-        super(x, y, 150, 2, 3, loadImage("img/ship/medic.png"));
+        super(x, y, 150, 2, loadImage("img/ship/medic.png"));
         shipInformation("Repair Ship", "Move", "Repair", "Shoot");
     }
 
@@ -15,24 +17,16 @@ public class Medic extends Ship {
     protected void actionTwo() {
         face(mouse());
         painter().setColor(Color.CYAN);
-        drawRangePointer(100);
-        if (click()) decreaseTurns(1);
+        drawRangePointer(HEAL_RANGE);
+        if (click() && RTSGame.ships.isWithin(mouseConstraint(HEAL_RANGE)) && !Game.mouseWithin(this)) {
+            ((Ship) RTSGame.ships.getAllWithin(mouseConstraint(HEAL_RANGE)).get(0)).hp += 4;
+            decreaseTurns(1);
+            en--;
+        }
     }
     
     @Override
     protected void actionThree() {
-        if (getTurns() < 2) {
-            setMode(2);
-            actionTwo();
-        }
-        else {
-            face(mouse());
-            painter().setColor(Color.GREEN);
-            drawRangePointer(300);
-            if (click()) {
-                RTSGame.bullets.add(new Bullet(getCenter(), mouseConstraint(400)));
-                decreaseTurns(getTurns());
-            }
-        }
+        shootRange(200, Color.RED, 2, 2);
     }
 }

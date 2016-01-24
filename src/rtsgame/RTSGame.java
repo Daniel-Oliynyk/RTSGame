@@ -1,13 +1,20 @@
 package rtsgame;
 
 import gametools.*;
+import static gametools.Game.painter;
 import static gametools.Tools.*;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.event.KeyEvent;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
+import java.util.List;
 
 public class RTSGame extends Game {
+    static final List<String> GLOBAL_ACTIONS = Arrays.asList("Cancel", "Next", "End Turn"),
+            ACTION_KEYS = Arrays.asList("Esc", "Tab", "Enter");
     static final int PAN_SPEED = 10;
     static BufferedImage star, bullet;
     static Group bullets, ships;
@@ -85,39 +92,7 @@ public class RTSGame extends Game {
         stars.drawAll();
         centerPainterOn(prevPainter);
         
-        if (keyEngaged(KeyEvent.VK_TAB)) {
-            boolean found = false, done = false;
-            for (Sprite sprite : RTSGame.ships.getAll()) {
-                Ship ship = (Ship) sprite;
-                if (!found && !done && ship.selected) {
-                    ship.selected = false;
-                    found = true;
-                    if (RTSGame.ships.getAll().indexOf(ship) > RTSGame.ships.size() - 2) {
-                        ((Ship)ships.get(0)).selected = true;
-                        centerPainterOn(((Ship)ships.get(0)));
-                        break;
-                    }
-                }
-                else if (found && !done && ship.turnComplete()) ship.selected = false;
-                else if (found && !done && !ship.turnComplete()) {
-                    ship.selected = true;
-                    centerPainterOn(ship);
-                    done = true;
-                }
-                else if (done) ship.selected = false;
-            }
-            if (!found) {
-                for (Sprite sprite : RTSGame.ships.getAll()) {
-                    Ship ship = (Ship) sprite;
-                    if (!ship.turnComplete()) {
-                        ship.selected = true;
-                        centerPainterOn(ship);
-                        break;
-                    }
-                }
-            }
-        }
-        
+        if (keyEngaged(KeyEvent.VK_TAB)) focusOnNextShip();
         if (keyPressed(KeyEvent.VK_W)) translatePainter(0, PAN_SPEED);
         if (keyPressed(KeyEvent.VK_S)) translatePainter(0, -PAN_SPEED);
         if (keyPressed(KeyEvent.VK_A)) translatePainter(PAN_SPEED, 0);
@@ -126,10 +101,67 @@ public class RTSGame extends Game {
         bullets.drawAll();
         ships.drawAll();
         
-        for (Sprite ship : ships.getAll()) ((Ship) ship).drawTurnCount();
-        for (Sprite ship : ships.getAll()) if (((Ship) ship).selected) ((Ship) ship).drawInformation();
+        for (Sprite ship : ships.getAll()) ((Ship) ship).drawStats();
+        for (Sprite ship : ships.getAll()) if (((Ship) ship).selected) ((Ship) ship).drawMenu();
         
         prevPainter = getPainterCenter();
         centerPainterOn(getCenter());
+        drawActions();
     }
+    
+    static void focusOnNextShip() {
+        boolean found = false, done = false;
+        for (Sprite sprite : RTSGame.ships.getAll()) {
+            Ship ship = (Ship) sprite;
+            if (!found && !done && ship.selected) {
+                ship.selected = false;
+                found = true;
+                /*if (RTSGame.ships.getAll().indexOf(ship) > RTSGame.ships.size() - 2) {
+                    ((Ship)ships.get(0)).selected = true;
+                    centerPainterOn(((Ship)ships.get(0)));
+                    break;
+                }*/
+            }
+            else if (found && !done && ship.getTurns() < 1) ship.selected = false;
+            else if (found && !done && ship.getTurns() > 0) {
+                ship.selected = true;
+                centerPainterOn(ship);
+                done = true;
+            }
+            else if (done) ship.selected = false;
+        }
+        
+        if (!found || !done) {
+            for (Sprite sprite : RTSGame.ships.getAll()) {
+                Ship ship = (Ship) sprite;
+                if (ship.getTurns() > 0) {
+                    ship.selected = true;
+                    centerPainterOn(ship);
+                    break;
+                }
+            }
+        }
+    }
+    
+    private void drawActions() {
+        int totalWidth = 0;
+        for (int i = 0; i < ACTION_KEYS.size(); i++) totalWidth += stringWidth("[" + ACTION_KEYS.get(i) + "]  " + GLOBAL_ACTIONS.get(i));
+        for (int i = 0; i < ACTION_KEYS.size() - 1; i++) totalWidth += stringWidth("   ");
+        int offset = (Game.getWidth() - totalWidth) / 2;
+        for (int i = 0; i < ACTION_KEYS.size(); i++) {
+            painter().setColor(Color.GRAY);
+            painter().drawString("[" + ACTION_KEYS.get(i) + "]  ", offset, Game.getHeight() - 30);
+            offset += stringWidth("[" + ACTION_KEYS.get(i) + "]  ");
+            painter().setColor(Color.WHITE);
+            painter().drawString(GLOBAL_ACTIONS.get(i), offset, Game.getHeight() - 30);
+            offset += stringWidth(GLOBAL_ACTIONS.get(i) + "   ");
+        }
+    }
+    
+    static final int stringWidth(String string) {
+        FontMetrics font = painter().getFontMetrics();
+        Rectangle2D rect = font.getStringBounds(string, painter());
+        return (int) rect.getWidth();
+    }
+    
 }

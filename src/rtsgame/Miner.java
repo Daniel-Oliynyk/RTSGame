@@ -7,8 +7,10 @@ import java.awt.Color;
 public class Miner extends Ship {
 
     public Miner(double x, double y) {
-        super(x, y, 75, 3, 2, loadImage("img/ship/miner.png"));
+        super(x, y, 75, 3, loadImage("img/ship/miner.png"));
         shipInformation("Mining Drone", "Move", "Harvest");
+        hp = 8;
+        en = 4;
     }
     
     @Override
@@ -16,6 +18,9 @@ public class Miner extends Ship {
         face(mouse());
         painter().setColor(Color.CYAN);
         drawRangePointer(50);
-        if (click()) decreaseTurns(1);
+        if (click()) {
+            decreaseTurns(1);
+            en++;
+        }
     }
 }
