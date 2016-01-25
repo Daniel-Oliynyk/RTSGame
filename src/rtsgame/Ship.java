@@ -16,7 +16,7 @@ public class Ship extends Sprite {
     int hp = 24, en = 8;
     boolean selected, arrived = true;
     private String name = "Ship";
-    private List<String> actions = Arrays.asList("Move", "Shoot");
+    private List<String> actions = Arrays.asList("Move", "Plasma Beam");
     Position moveLocation;
     
     public Ship(double x, double y, int range, int turns, BufferedImage image) {

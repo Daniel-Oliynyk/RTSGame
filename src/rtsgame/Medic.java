@@ -9,8 +9,8 @@ public class Medic extends Ship {
     final int HEAL_RANGE = 100;
 
     public Medic(double x, double y) {
-        super(x, y, 150, 2, loadImage("img/ship/medic.png"));
-        shipInformation("Repair Ship", "Move", "Repair", "Shoot");
+        super(x, y, 200, 2, loadImage("img/ship/medic.png"));
+        shipInformation("Repair Ship", "Move", "Repair Beam", "Energy Bolt");
     }
 
     @Override

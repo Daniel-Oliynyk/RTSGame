@@ -9,10 +9,10 @@ public class Sniper extends Ship {
     
     public Sniper(double x, double y) {
         super(x, y, 150, 2, loadImage("img/ship/sniper.png"));
-        shipInformation("Corvette", "Move", "Shoot", "Laser");
+        shipInformation("Destroyer", "Move", "Plasma Beam", "EMP Round");
         hp = 16;
     }
-
+    
     @Override
     protected void actionTwo() {
         shootRange(200);
@@ -29,9 +29,9 @@ public class Sniper extends Ship {
             painter().setColor(Color.CYAN);
             drawRangePointer(SNIPER_RANGE);
             if (click()) {
-                RTSGame.bullets.add(new Bullet(getCenter(), mouseConstraint(SNIPER_RANGE), RTSGame.sniperBullet));
+                RTSGame.bullets.add(new Bullet(getCenter(), mouseConstraint(SNIPER_RANGE), RTSGame.bolt));
                 decreaseTurns(2);
-                en--;
+                en -= 2;
             }
         }
     }

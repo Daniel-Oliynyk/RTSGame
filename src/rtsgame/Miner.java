@@ -7,7 +7,7 @@ import java.awt.Color;
 public class Miner extends Ship {
 
     public Miner(double x, double y) {
-        super(x, y, 75, 3, loadImage("img/ship/miner.png"));
+        super(x, y, 100, 3, loadImage("img/ship/miner.png"));
         shipInformation("Mining Drone", "Move", "Harvest");
         hp = 8;
         en = 4;
