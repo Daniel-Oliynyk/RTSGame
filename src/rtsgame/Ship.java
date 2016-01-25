@@ -21,6 +21,7 @@ public class Ship extends Sprite {
     
     public Ship(double x, double y, int range, int turns, BufferedImage image) {
         super(image);
+        setSpeed(7);
         centerOn(x, y);
         moveLocation = getCenter();
         MOVE_RANGE = range;
@@ -42,7 +43,7 @@ public class Ship extends Sprite {
             if (arrived) selected();
         }
         if (!arrived) moveTo(moveLocation);
-        if (moveLocation.dist(getCenter()) < 2) arrived = true;
+        if (moveLocation.dist(getCenter()) < 2/* || RTSGame.ships.getAllWithin(this).size() > 1*/) arrived = true;
         if (click() && Game.mouseWithin(this) && arrived && turns > 0) {
             boolean otherShipSelected = false;
             for (Sprite ship : RTSGame.ships.getAll()) if (((Ship) ship).selected) otherShipSelected = true;
@@ -73,7 +74,7 @@ public class Ship extends Sprite {
     }
     
     protected void actionTwo() {
-        shootRange(400);
+        shootRange(300);
     }
     
     protected void actionThree() {}

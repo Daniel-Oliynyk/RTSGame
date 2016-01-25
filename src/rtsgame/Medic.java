@@ -9,7 +9,7 @@ public class Medic extends Ship {
     final int HEAL_RANGE = 100;
 
     public Medic(double x, double y) {
-        super(x, y, 150, 2, loadImage("img/ship/medic.png"));
+        super(x, y, 150, 2, loadImage("img/ship/medic1.png"));
         shipInformation("Repair Ship", "Move", "Repair", "Shoot");
     }
 
@@ -18,10 +18,12 @@ public class Medic extends Ship {
         face(mouse());
         painter().setColor(Color.CYAN);
         drawRangePointer(HEAL_RANGE);
-        if (click() && RTSGame.ships.isWithin(mouseConstraint(HEAL_RANGE)) && !Game.mouseWithin(this)) {
-            ((Ship) RTSGame.ships.getAllWithin(mouseConstraint(HEAL_RANGE)).get(0)).hp += 4;
+        if (click()) {
+            if (RTSGame.ships.isWithin(mouseConstraint(HEAL_RANGE)) && !Game.mouseWithin(this)) {
+                ((Ship) RTSGame.ships.getAllWithin(mouseConstraint(HEAL_RANGE)).get(0)).hp += 4;
+                en--;
+            }
             decreaseTurns(1);
-            en--;
         }
     }
     

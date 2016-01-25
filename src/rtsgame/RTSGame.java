@@ -16,7 +16,7 @@ public class RTSGame extends Game {
     static final List<String> GLOBAL_ACTIONS = Arrays.asList("Cancel", "Next", "End Turn"),
             ACTION_KEYS = Arrays.asList("Esc", "Tab", "Enter");
     static final int PAN_SPEED = 10;
-    static BufferedImage star, bullet;
+    static BufferedImage star, bullet, sniperBullet, tankBullet;
     static Group bullets, ships;
     static Animation explosion;
     private Group stars;
@@ -59,6 +59,8 @@ public class RTSGame extends Game {
         
         star = loadImage("img/star.png");
         bullet = loadImage("img/bullet.png");
+        sniperBullet = loadImage("img/laser.png");
+        tankBullet = loadImage("img/shell.png");
         explosion = new Animation(loadSpriteSheet("img/explosion.png", 32, 32));
         explosion.setRepeatAmount(1);
         explosion.setSpeed(2);

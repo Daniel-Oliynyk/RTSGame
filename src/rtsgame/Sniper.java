@@ -5,9 +5,10 @@ import static gametools.Tools.*;
 import java.awt.Color;
 
 public class Sniper extends Ship {
-
+    final int SNIPER_RANGE = 400;
+    
     public Sniper(double x, double y) {
-        super(x, y, 150, 2, loadImage("img/ship/sniper.png"));
+        super(x, y, 150, 2, loadImage("img/ship/sniper1.png"));
         shipInformation("Corvette", "Move", "Shoot", "Laser");
         hp = 16;
     }
@@ -26,11 +27,9 @@ public class Sniper extends Ship {
         else {
             face(mouse());
             painter().setColor(Color.CYAN);
-            drawRangePointer(500);
+            drawRangePointer(SNIPER_RANGE);
             if (click()) {
-                RTSGame.bullets.add(new Bullet(getCenter(), mouseConstraint(500)));
-                RTSGame.bullets.add(new Bullet(mouseConstraint(30), mouseConstraint(500)));
-                RTSGame.bullets.add(new Bullet(mouseConstraint(60), mouseConstraint(500)));
+                RTSGame.bullets.add(new Bullet(getCenter(), mouseConstraint(SNIPER_RANGE), RTSGame.sniperBullet));
                 decreaseTurns(2);
                 en--;
             }

@@ -1,17 +1,22 @@
 package rtsgame;
 
 import gametools.*;
-import static gametools.Tools.*;
+import java.awt.image.BufferedImage;
 
 public class Bullet extends Sprite {
     Position target;
     
     public Bullet(Position center, Position target) {
-        super(loadImage("img/bullet.png"));
+        this(center, target, RTSGame.bullet);
+        setSpeed(10);
+    }
+    
+    public Bullet(Position center, Position target, BufferedImage image) {
+        super(image);
         centerOn(center);
         face(target);
         this.target = target;
-        setSpeed(12);
+        setSpeed(14);
     }
     
     @Override
