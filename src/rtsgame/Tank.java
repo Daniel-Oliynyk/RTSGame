@@ -8,7 +8,7 @@ import java.awt.Color;
 public class Tank extends Ship {
 
     public Tank(double x, double y) {
-        super(x, y, 150, 1, loadImage("img/ship/tank2.png"));
+        super(x, y, 150, 1, loadImage("img/ship/tank.png"));
         setSpeed(5);
         shipInformation("Battlecruiser", "Move", "Shoot");
         hp = 48;

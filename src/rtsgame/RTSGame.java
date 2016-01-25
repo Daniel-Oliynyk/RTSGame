@@ -13,8 +13,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class RTSGame extends Game {
-    static final List<String> GLOBAL_ACTIONS = Arrays.asList("Cancel", "Next", "End Turn"),
-            ACTION_KEYS = Arrays.asList("Esc", "Tab", "Enter");
+    static final List<String> GLOBAL_ACTIONS = Arrays.asList("Cancel", "Move Camera", "Next", "End Turn"),
+            ACTION_KEYS = Arrays.asList("Esc", "W] [A] [S] [D", "Tab", "Enter");
     static final int PAN_SPEED = 10;
     static BufferedImage star, bullet, sniperBullet, tankBullet;
     static Group bullets, ships;

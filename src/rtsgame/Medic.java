@@ -9,7 +9,7 @@ public class Medic extends Ship {
     final int HEAL_RANGE = 100;
 
     public Medic(double x, double y) {
-        super(x, y, 150, 2, loadImage("img/ship/medic1.png"));
+        super(x, y, 150, 2, loadImage("img/ship/medic.png"));
         shipInformation("Repair Ship", "Move", "Repair", "Shoot");
     }
 

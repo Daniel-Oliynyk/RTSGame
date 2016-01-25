@@ -119,13 +119,6 @@ public class Ship extends Sprite {
         return Game.mousePosition();
     }
     
-    protected final Position mouseConstraint(double length) {
-        if (getCenter().dist(mouse()) < length) return mouse();
-        double mX = getCenter().x() + Math.cos(getCenter().angleTo(mouse())) * length;
-        double mY = getCenter().y() + Math.sin(getCenter().angleTo(mouse())) * length;
-        return new Position(mX, mY);
-    }
-    
     final void drawMenu() {
         Position prev = Game.getPainterCenter();
         Game.centerPainterOn(Game.getCenter());
@@ -166,6 +159,13 @@ public class Ship extends Sprite {
             painter().setColor(turns > 0? Color.YELLOW : Color.GRAY);
             painter().drawString(turns + "", (int) (getCenter().x() + ORIGINAL_SIZE / 2), (int) (getCenter().y() + ORIGINAL_SIZE / 2));
         }
+    }
+    
+    protected final Position mouseConstraint(double length) {
+        if (getCenter().dist(mouse()) < length) return mouse();
+        double mX = getCenter().x() + Math.cos(getCenter().angleTo(mouse())) * length;
+        double mY = getCenter().y() + Math.sin(getCenter().angleTo(mouse())) * length;
+        return new Position(mX, mY);
     }
     
     protected final void drawRange(int range) {

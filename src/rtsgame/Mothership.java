@@ -7,7 +7,7 @@ import java.awt.Color;
 public class Mothership extends Ship {
 
     public Mothership(double x, double y) {
-        super(x, y, 100, 2, loadImage("img/ship/mothership1.png"));
+        super(x, y, 100, 2, loadImage("img/ship/mothership.png"));
         setSpeed(3);
         shipInformation("Mothership", "Move", "Shoot", "Shield");
         hp = 72;

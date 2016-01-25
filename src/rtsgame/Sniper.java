@@ -8,7 +8,7 @@ public class Sniper extends Ship {
     final int SNIPER_RANGE = 400;
     
     public Sniper(double x, double y) {
-        super(x, y, 150, 2, loadImage("img/ship/sniper1.png"));
+        super(x, y, 150, 2, loadImage("img/ship/sniper.png"));
         shipInformation("Corvette", "Move", "Shoot", "Laser");
         hp = 16;
     }
