@@ -80,8 +80,9 @@ public class Ship extends Sprite {
     
     protected void actionTwo() {
         face(mouse());
-        painter().setColor(energy > 0? Color.YELLOW : Color.GRAY);
+        painter().setColor(energy > 0? Color.CYAN : Color.GRAY);
         drawRange(ORIGINAL_SIZE.width > 100? 75 : 50);
+        drawRange(ORIGINAL_SIZE.width > 100? 70 : 45);
         if (click()) {
             shield = true;
             decreaseTurns(turns);
