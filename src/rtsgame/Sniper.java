@@ -1,6 +1,7 @@
 package rtsgame;
 
 import static gametools.Game.painter;
+import gametools.Position;
 import static gametools.Tools.*;
 import java.awt.Color;
 
@@ -25,8 +26,9 @@ public class Sniper extends Ship {
             drawRangePointer(SNIPER_RANGE);
             if (click() && energy > 0 && getTurns() > 1) {
                 shootBullet(getCenter(), mouseConstraint(SNIPER_RANGE), RTSGame.bolt, TEAM);
-                decreaseTurns(2);
+                RTSGame.addMessage("-2", Color.CYAN, new Position(x, y + 20));
                 energy -= 2;
+                decreaseTurns(2);
             }
     }
 }

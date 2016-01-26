@@ -4,6 +4,7 @@ import gametools.*;
 import java.awt.image.BufferedImage;
 
 public class Bullet extends Sprite {
+    final int TEAM;
     Position target;
     
     public Bullet(Position center, Position target, int team) {
@@ -17,13 +18,19 @@ public class Bullet extends Sprite {
         face(target);
         this.target = target;
         setSpeed(14);
+        TEAM = team;
     }
     
     @Override
     protected void update() {
         if (getAnimation().getAllFrames().length < 2) {
             moveTo(target);
-            if (target.dist(getCenter()) < 1) {
+            boolean collide = false;
+            if (RTSGame.ships[TEAM].getAllWithin(this).size() > 0) {
+                ((Ship) RTSGame.ships[TEAM ].getAllWithin(this).get(0)).health -= 4;
+                collide = true;
+            }
+            if (target.dist(getCenter()) < 1 || collide) {
                 setAnimation(new Animation(RTSGame.explosion));
                 centerOn(target);
             }

@@ -105,7 +105,7 @@ public class Ship extends Sprite {
         drawRangePointer(range);
         if (click()) {
             shootBullet(getCenter(), mouseConstraint(range), TEAM);
-            decreaseTurns(turns);
+            decreaseTurns(1);
         }
     }
     

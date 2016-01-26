@@ -31,7 +31,7 @@ public class Mothership extends Ship {
             if (RTSGame.ships[TEAM].isWithin(mouseConstraint(CHARGE_RANGE)) && !Game.mouseWithin(this)) {
                 ((Ship) RTSGame.ships[TEAM].getAllWithin(mouseConstraint(CHARGE_RANGE)).get(0)).energy += 4;
                 RTSGame.addMessage("-4", Color.CYAN, new Position(x, y + 30));
-                RTSGame.addMessage("+4", Color.CYAN, new Position(mouseConstraint(CHARGE_RANGE).x(), mouseConstraint(CHARGE_RANGE).y() - 20));
+                RTSGame.addMessage("+4", Color.CYAN, mouseConstraint(CHARGE_RANGE));
                 energy -= 4;
             }
             decreaseTurns(1);

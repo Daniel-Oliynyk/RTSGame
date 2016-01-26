@@ -23,7 +23,7 @@ public class Medic extends Ship {
             if (RTSGame.ships[TEAM].isWithin(mouseConstraint(HEAL_RANGE)) && !Game.mouseWithin(this)) {
                 ((Ship) RTSGame.ships[TEAM].getAllWithin(mouseConstraint(HEAL_RANGE)).get(0)).health += 4;
                 energy--;
-                RTSGame.addMessage("+15", Color.GREEN, new Position(mouseConstraint(HEAL_RANGE).x(), mouseConstraint(HEAL_RANGE).y() - 20));
+                RTSGame.addMessage("+15", Color.GREEN, mouseConstraint(HEAL_RANGE));
                 RTSGame.addMessage("-1", Color.CYAN, new Position(x, y));
                 decreaseTurns(1);
             }
