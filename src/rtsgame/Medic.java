@@ -8,8 +8,8 @@ import java.awt.Color;
 public class Medic extends Ship {
     final int HEAL_RANGE = 100;
 
-    public Medic(double x, double y) {
-        super(x, y, 200, 2, loadImage("img/ship/medic.png"));
+    public Medic(double x, double y, int team) {
+        super(x, y, 200, 2, loadImage("img/ship/medic.png"), team);
         shipInformation("Repair Ship", "Move", "Repair Beam", "Energy Bolt");
     }
 
@@ -19,9 +19,9 @@ public class Medic extends Ship {
         painter().setColor(Color.CYAN);
         drawRangePointer(HEAL_RANGE);
         if (click()) {
-            if (RTSGame.ships.isWithin(mouseConstraint(HEAL_RANGE)) && !Game.mouseWithin(this)) {
-                ((Ship) RTSGame.ships.getAllWithin(mouseConstraint(HEAL_RANGE)).get(0)).hp += 4;
-                en--;
+            if (RTSGame.ships[TEAM].isWithin(mouseConstraint(HEAL_RANGE)) && !Game.mouseWithin(this)) {
+                ((Ship) RTSGame.ships[TEAM].getAllWithin(mouseConstraint(HEAL_RANGE)).get(0)).health += 4;
+                energy--;
             }
             decreaseTurns(1);
         }

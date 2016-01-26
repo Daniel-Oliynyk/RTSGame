@@ -6,11 +6,11 @@ import java.awt.Color;
 
 public class Battlecruiser extends Ship {
 
-    public Battlecruiser(double x, double y) {
-        super(x, y, 150, 1, loadImage("img/ship/battlecruiser.png"));
+    public Battlecruiser(double x, double y, int team) {
+        super(x, y, 150, 1, loadImage("img/ship/battlecruiser.png"), team);
         setSpeed(3);
         shipInformation("Battlecruiser", "Move", "Rail Gun");
-        hp = 48;
+        health = 48;
     }
     
     @Override
@@ -19,9 +19,9 @@ public class Battlecruiser extends Ship {
         painter().setColor(Color.RED);
         drawRangePointer(300);
         if (click()) {
-            RTSGame.bullets.add(new Bullet(getCenter(), mouseConstraint(300), RTSGame.bolt));
+            shootBullet(getCenter(), mouseConstraint(300), RTSGame.bolt, TEAM);
             decreaseTurns(1);
-            en--;
+            energy--;
         }
     }
 }

@@ -6,12 +6,12 @@ import java.awt.image.BufferedImage;
 public class Bullet extends Sprite {
     Position target;
     
-    public Bullet(Position center, Position target) {
-        this(center, target, RTSGame.bullet);
+    public Bullet(Position center, Position target, int team) {
+        this(center, target, RTSGame.bullet, team);
         setSpeed(10);
     }
     
-    public Bullet(Position center, Position target, BufferedImage image) {
+    public Bullet(Position center, Position target, BufferedImage image, int team) {
         super(image);
         centerOn(center);
         face(target);
@@ -23,7 +23,7 @@ public class Bullet extends Sprite {
     protected void update() {
         if (getAnimation().getAllFrames().length < 2) {
             moveTo(target);
-            if (getCenter().x() == target.x() && getCenter().y() == target.y()) {
+            if (target.dist(getCenter()) < 1) {
                 setAnimation(new Animation(RTSGame.explosion));
                 centerOn(target);
             }

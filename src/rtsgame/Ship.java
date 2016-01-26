@@ -1,8 +1,10 @@
 package rtsgame;
 
 import gametools.*;
-import static gametools.Game.painter;
+import static rtsgame.RTSGame.*;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -11,23 +13,26 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Ship extends Sprite {
-    final int MOVE_RANGE, ORIGINAL_SIZE, MAX_TURNS;
+    final int MOVE_RANGE, MAX_TURNS, SNAP = 15, TEAM, ENEMY;
+    final Dimension ORIGINAL_SIZE;
     private int mode = 1, turns;
-    int hp = 24, en = 8;
+    int health = 24, energy = 8;
     boolean selected, arrived = true;
     private String name = "Ship";
     private List<String> actions = Arrays.asList("Move", "Plasma Beam");
     Position moveLocation;
     
-    public Ship(double x, double y, int range, int turns, BufferedImage image) {
-        super(image);
+    public Ship(double x, double y, int range, int turns, BufferedImage image, int team) {
+        super(teamColor(image, team));
         setSpeed(7);
         centerOn(x, y);
         moveLocation = getCenter();
         MOVE_RANGE = range;
-        ORIGINAL_SIZE = image.getWidth();
+        ORIGINAL_SIZE = new Dimension(image.getWidth(), image.getHeight());
         MAX_TURNS = turns < 1? 1 : turns;
         resetTurn();
+        TEAM = team;
+        ENEMY = team == 0? 1 : 0;
     }
     
     @Override
@@ -43,10 +48,10 @@ public class Ship extends Sprite {
             if (arrived) selected();
         }
         if (!arrived) moveTo(moveLocation);
-        if (moveLocation.dist(getCenter()) < 2/* || RTSGame.ships.getAllWithin(this).size() > 1*/) arrived = true;
-        if (click() && Game.mouseWithin(this) && arrived && turns > 0) {
+        if (moveLocation.dist(getCenter()) < 1/* || ships.getAllWithin(this).size() > 1*/) arrived = true;
+        if (player == TEAM && click() && Game.mouseWithin(this) && arrived && turns > 0) {
             boolean otherShipSelected = false;
-            for (Sprite ship : RTSGame.ships.getAll()) if (((Ship) ship).selected) otherShipSelected = true;
+            for (Sprite ship : ships[TEAM].getAll()) if (((Ship) ship).selected) otherShipSelected = true;
             selected = !otherShipSelected;
         }
     }
@@ -64,11 +69,11 @@ public class Ship extends Sprite {
         face(mouse());
         painter().setColor(Color.WHITE);
         for (int i = 1; i <= turns; i++) drawRange(MOVE_RANGE * i);
-        drawPointer(mouseConstraint(MOVE_RANGE * turns));
+        drawPointer(mouseConstraint(MOVE_RANGE * turns, MOVE_RANGE));
         if (click()) {
-            moveLocation = mouseConstraint(MOVE_RANGE * turns);
+            moveLocation = mouseConstraint(MOVE_RANGE * turns, MOVE_RANGE);
             arrived = false;
-            decreaseTurns((int) Math.ceil(getCenter().dist(moveLocation) / MOVE_RANGE));
+            decreaseTurns((int) Math.ceil((getCenter().dist(moveLocation) - SNAP) / MOVE_RANGE));
             mode = 2;
         }
     }
@@ -99,7 +104,7 @@ public class Ship extends Sprite {
             painter().setColor(col);
             drawRangePointer(range);
             if (click()) {
-                RTSGame.bullets.add(new Bullet(getCenter(), mouseConstraint(range)));
+                shootBullet(getCenter(), mouseConstraint(range), TEAM);
                 decreaseTurns(turns);
             }
         }
@@ -120,49 +125,68 @@ public class Ship extends Sprite {
     }
     
     final void drawMenu() {
-        Position prev = Game.getPainterCenter();
+        Position prevPainter = Game.getPainterCenter();
         Game.centerPainterOn(Game.getCenter());
+        
         painter().setColor(Color.YELLOW);
-        painter().drawString(name, (Game.getWidth() - RTSGame.stringWidth(name)) / 2, Game.getHeight() - 90);
-        painter().setColor(Color.WHITE);
+        painter().drawString(name, (Game.getWidth() - stringWidth(name)) / 2, Game.getHeight() - 120);
+        
+        Font prevFont = painter().getFont();
+        Font small = new Font("Arial", Font.PLAIN, 12);
+        painter().setFont(small);
+        painter().setColor(new Color(0xbfbfbf));
+        String stats = "Health: " + health + "  Energy: " + energy + "  Turns: " + turns;
+        painter().drawString(stats, (Game.getWidth() - stringWidth(stats)) / 2, Game.getHeight() - 100);
+        painter().setFont(prevFont);
+        
         int totalWidth = 0;
-        for (int i = 0; i < actions.size(); i++) totalWidth += RTSGame.stringWidth("[" + (i + 1) + "]  " + actions.get(i));
-        for (int i = 0; i < actions.size() - 1; i++) totalWidth += RTSGame.stringWidth("   ");
+        for (int i = 0; i < actions.size(); i++) totalWidth += stringWidth("[" + (i + 1) + "]  " + actions.get(i));
+        for (int i = 0; i < actions.size() - 1; i++) totalWidth += stringWidth("   ");
         int offset = (Game.getWidth() - totalWidth) / 2;
+        
         for (int i = 0; i < actions.size(); i++) {
             painter().setColor(Color.GRAY);
             painter().drawString("[" + (i + 1) + "]  ", offset, Game.getHeight() - 60);
-            offset += RTSGame.stringWidth("[" + (i + 1) + "]  ");
+            offset += stringWidth("[" + (i + 1) + "]  ");
             painter().setColor(mode - 1 == i? Color.YELLOW : Color.WHITE);
             painter().drawString(actions.get(i), offset, Game.getHeight() - 60);
-            offset += RTSGame.stringWidth(actions.get(i) + "   ");
+            offset += stringWidth(actions.get(i) + "   ");
         }
-        Game.centerPainterOn(prev);
+        
+        Game.centerPainterOn(prevPainter);
     }
     
     final void drawStats() {
-        int bottom = (int) getCenter().y() + ORIGINAL_SIZE / 2;
-        if (selected) {
-            String hs = hp + "H ", es = en + "E ", ts = turns + "T";
-            int offset = (int) getCenter().x() - RTSGame.stringWidth(hs + es + ts) / 2;
-            bottom += 15;
-            painter().setColor(Color.GREEN);
-            painter().drawString(hs, offset, bottom);
-            offset += RTSGame.stringWidth(hs);
-            painter().setColor(Color.CYAN);
-            painter().drawString(es, offset, bottom);
-            offset += RTSGame.stringWidth(es);
-            painter().setColor(Color.YELLOW);
-            painter().drawString(ts, offset, bottom);
-        }
-        else {
-            painter().setColor(turns > 0? Color.YELLOW : Color.GRAY);
-            painter().drawString(turns + "", (int) (getCenter().x() + ORIGINAL_SIZE / 2), (int) (getCenter().y() + ORIGINAL_SIZE / 2));
-        }
+        Font prev = painter().getFont();
+        Font small = new Font("Arial", Font.PLAIN, 12);
+        painter().setFont(small);
+        
+        int bottom = (int) getCenter().y() + ORIGINAL_SIZE.height / 2 + 15;
+        String hs = health + " ", es = energy + " ", ts = turns + "";
+        int offset = (int) getCenter().x() + ORIGINAL_SIZE.width / 2 - stringWidth(hs + es + ts);
+        
+        painter().setColor(selected? Color.GREEN : turns > 0? Color.WHITE : Color.GRAY);
+        painter().drawString(hs, offset, bottom);
+        offset += stringWidth(hs);
+        painter().setColor(selected? Color.CYAN : turns > 0? Color.WHITE : Color.GRAY);
+        painter().drawString(es, offset, bottom);
+        offset += stringWidth(es);
+        painter().setColor(selected? Color.YELLOW : turns > 0? Color.WHITE : Color.GRAY);
+        painter().drawString(ts, offset, bottom);
+        
+        painter().setFont(prev);
     }
     
-    protected final Position mouseConstraint(double length) {
-        if (getCenter().dist(mouse()) < length) return mouse();
+    protected final Position mouseConstraint(int length) {
+        return mouseConstraint(length, 0);
+    }
+    
+    protected final Position mouseConstraint(int length, int snap) {
+        if (getCenter().dist(mouse()) < length) {
+            if (getCenter().dist(mouse()) % snap < SNAP || getCenter().dist(mouse()) % snap > snap - SNAP
+                    && getCenter().dist(mouse()) < length - SNAP) length = snap * (int) Math.round(getCenter().dist(mouse()) / snap);
+            else return mouse();
+        }
         double mX = getCenter().x() + Math.cos(getCenter().angleTo(mouse())) * length;
         double mY = getCenter().y() + Math.sin(getCenter().angleTo(mouse())) * length;
         return new Position(mX, mY);
@@ -193,8 +217,8 @@ public class Ship extends Sprite {
     }
     
     final void resetTurn() {
+        deselect();
         turns = MAX_TURNS;
-        mode = 1;
     }
     
     final int getMode() {
@@ -215,5 +239,12 @@ public class Ship extends Sprite {
             turns = 0;
             deselect();
         }
+    }
+    final void shootBullet(Position center, Position target, int team) {
+        bullets[team].add(new Bullet(center, target, team == 0? 1 : 0));
+    }
+    
+    final void shootBullet(Position center, Position target, BufferedImage image, int team) {
+        bullets[team].add(new Bullet(center, target, image, team == 0? 1 : 0));
     }
 }
