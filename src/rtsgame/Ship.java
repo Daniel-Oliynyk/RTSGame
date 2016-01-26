@@ -30,7 +30,7 @@ public class Ship extends Sprite {
         MOVE_RANGE = range;
         ORIGINAL_SIZE = new Dimension(image.getWidth(), image.getHeight());
         MAX_TURNS = turns < 1? 1 : turns;
-        resetTurn();
+        resetTurn(true);
         TEAM = team;
         ENEMY = team == 0? 1 : 0;
     }
@@ -214,12 +214,13 @@ public class Ship extends Sprite {
         return turns < 1 && arrived;
     }
     
-    final void resetTurn() {
+    final void resetTurn(boolean next) {
         deselect();
-        if (shield) {
+        if (shield && next) {
             energy--;
             if (energy < 0) energy = 0;
             shield = false;
+            addMessage("-1", Color.CYAN, new Position(x, y + 20));
         }
         turns = MAX_TURNS;
     }
@@ -255,9 +256,9 @@ public class Ship extends Sprite {
     public void draw(UpdateType type) {
         super.draw(type);
         if (shield) {
-            int diameter = ORIGINAL_SIZE.width > 100? 150 : 100; 
-            painter().setColor(Color.BLUE);
-            painter().drawOval((int) getCenter().x() - diameter / 2, (int) getCenter().y() - diameter / 2, diameter, diameter);
+            int radius = ORIGINAL_SIZE.width > 100? 128 : 64;
+            BufferedImage image = ORIGINAL_SIZE.width > 100? largeShield : smallShield;
+            painter().drawImage(image, (int) getCenter().x() - radius, (int) getCenter().y() - radius, null);
         }
     }
 }

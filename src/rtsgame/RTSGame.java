@@ -11,17 +11,20 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 public class RTSGame extends Game {
     static final List<String> GLOBAL_ACTIONS = Arrays.asList("Cancel", "Pan Camera", "Next", "End Turn"),
             ACTION_KEYS = Arrays.asList("Esc", "W] [A] [S] [D", "Tab", "Enter");
     static final int PAN_SPEED = 15;
-    static int player = 0;
-    static BufferedImage star, bullet, bolt;
+    static int player;
+    static BufferedImage star, bullet, bolt, smallShield, largeShield;
     static Group[] ships, bullets;
     static Animation explosion;
+    static List<Message> overlay;
     private Group stars;
     int starCooldown;
     Position prevPainter;
@@ -41,6 +44,7 @@ public class RTSGame extends Game {
     
     @Override
     protected void setup() {
+        player = 0;
         prevPainter = getPainterCenter();
         
         bullets = new Group[2];
@@ -88,6 +92,9 @@ public class RTSGame extends Game {
         star = loadImage("img/star.png");
         bullet = loadImage("img/bullet.png");
         bolt = loadImage("img/bolt.png");
+        smallShield = loadImage("img/smallshield.png");
+        largeShield = loadImage("img/bigshield.png");
+        
         explosion = new Animation(loadSpriteSheet("img/explosion.png", 32, 32));
         explosion.setRepeatAmount(1);
         explosion.setSpeed(2);
@@ -98,6 +105,8 @@ public class RTSGame extends Game {
         
         Font large = new Font("Arial", Font.PLAIN, 16);
         painter().setFont(large);
+        
+        overlay = new ArrayList<>();
     }
     
     @Override
@@ -121,9 +130,10 @@ public class RTSGame extends Game {
         boolean allComplete = true;
         for (Sprite ship : ships[player].getAll()) if (!((Ship) ship).turnComplete()) allComplete = false;
         if (allComplete || keyEngaged(KeyEvent.VK_ENTER)) {
+            for (Sprite ship : ships[player].getAll()) ((Ship) ship).resetTurn(false);
             player = player == 0? 1 : 0;
             bullets[player].clear(true);
-            for (Sprite ship : ships[player].getAll()) ((Ship) ship).resetTurn();
+            for (Sprite ship : ships[player].getAll()) ((Ship) ship).resetTurn(true);
             focusOnNextShip();
         }
         
@@ -140,6 +150,12 @@ public class RTSGame extends Game {
         
         for (Sprite ship : ships[player].getAll()) ((Ship) ship).drawStats();
         for (Sprite ship : ships[player].getAll()) if (((Ship) ship).selected) ((Ship) ship).drawMenu();
+        
+        for (Iterator<Message> it = overlay.iterator(); it.hasNext();) {
+            Message message = it.next();
+            message.draw();
+            if (message.remove) it.remove();
+        }
         
         prevPainter = getPainterCenter();
         centerPainterOn(getCenter());
@@ -222,5 +238,9 @@ public class RTSGame extends Game {
             }
         }
         return copy;
+    }
+    
+    static void addMessage(String message, Color col, Position pos) {
+        overlay.add(new Message(message, col, pos));
     }
 }

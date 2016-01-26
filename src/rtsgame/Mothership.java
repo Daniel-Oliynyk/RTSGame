@@ -2,6 +2,7 @@ package rtsgame;
 
 import gametools.Game;
 import static gametools.Game.painter;
+import gametools.Position;
 import static gametools.Tools.*;
 import java.awt.Color;
 
@@ -29,7 +30,9 @@ public class Mothership extends Ship {
         if (click() && energy > 0) {
             if (RTSGame.ships[TEAM].isWithin(mouseConstraint(CHARGE_RANGE)) && !Game.mouseWithin(this)) {
                 ((Ship) RTSGame.ships[TEAM].getAllWithin(mouseConstraint(CHARGE_RANGE)).get(0)).energy += 4;
-                energy--;
+                RTSGame.addMessage("-4", Color.CYAN, new Position(x, y + 30));
+                RTSGame.addMessage("+4", Color.CYAN, new Position(mouseConstraint(CHARGE_RANGE).x(), mouseConstraint(CHARGE_RANGE).y() - 20));
+                energy -= 4;
             }
             decreaseTurns(1);
         }
