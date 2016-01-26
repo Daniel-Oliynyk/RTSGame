@@ -9,15 +9,18 @@ import java.awt.FontMetrics;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
 import java.util.Arrays;
 import java.util.List;
 
 public class RTSGame extends Game {
-    static final List<String> GLOBAL_ACTIONS = Arrays.asList("Cancel", "Move Camera", "Next", "End Turn"),
+    static final List<String> GLOBAL_ACTIONS = Arrays.asList("Cancel", "Pan Camera", "Next", "End Turn"),
             ACTION_KEYS = Arrays.asList("Esc", "W] [A] [S] [D", "Tab", "Enter");
     static final int PAN_SPEED = 10;
-    static BufferedImage star, bullet, sniperBullet, tankBullet;
-    static Group bullets, ships;
+    static int player = 0;
+    static BufferedImage star, bullet, bolt;
+    static Group[] ships, bullets;
     static Animation explosion;
     private Group stars;
     int starCooldown;
@@ -39,28 +42,52 @@ public class RTSGame extends Game {
     @Override
     protected void setup() {
         prevPainter = getPainterCenter();
-        bullets = new Group();
         
-        ships = new Group();
-        ships.add(new Miner(100, 350));
-        ships.add(new Miner(100, 450));
+        bullets = new Group[2];
+        bullets[0] = new Group();
+        bullets[1] = new Group();
         
-        ships.add(new Tank(250, 250));
-        ships.add(new Mothership(250, 400));
-        ships.add(new Tank(250, 550));
+        //<editor-fold defaultstate="collapsed" desc="Spawn Positions">
+        ships = new Group[2];
+        ships[0] = new Group();
+        ships[1] = new Group();
         
-        ships.add(new Medic(400, 250));
-        ships.add(new Sniper(400, 400));
-        ships.add(new Medic(400, 550));
+        ships[0].add(new Miner(100, 350, 0));
+        ships[0].add(new Miner(100, 450, 0));
         
-        ships.add(new Fighter(550, 250));
-        ships.add(new Fighter(550, 400));
-        ships.add(new Fighter(550, 550));
+        ships[0].add(new Battlecruiser(250, 250, 0));
+        ships[0].add(new Mothership(250, 400, 0));
+        ships[0].add(new Battlecruiser(250, 550, 0));
+        
+        ships[0].add(new Medic(400, 250, 0));
+        ships[0].add(new Sniper(400, 400, 0));
+        ships[0].add(new Medic(400, 550, 0));
+        
+        ships[0].add(new Fighter(550, 250, 0));
+        ships[0].add(new Fighter(550, 400, 0));
+        ships[0].add(new Fighter(550, 550, 0));
+        
+        ships[1].add(new Miner(1900, 350, 1));
+        ships[1].add(new Miner(1900, 450, 1));
+        
+        ships[1].add(new Battlecruiser(1750, 250, 1));
+        ships[1].add(new Mothership(1750, 400, 1));
+        ships[1].add(new Battlecruiser(1750, 550, 1));
+        
+        ships[1].add(new Medic(1600, 250, 1));
+        ships[1].add(new Sniper(1600, 400, 1));
+        ships[1].add(new Medic(1600, 550, 1));
+        
+        ships[1].add(new Fighter(1450, 250, 1));
+        ships[1].add(new Fighter(1450, 400, 1));
+        ships[1].add(new Fighter(1450, 550, 1));
+        
+        for (Sprite ship : ships[1].getAll()) ship.setAngle(Math.PI);
+//</editor-fold>
         
         star = loadImage("img/star.png");
         bullet = loadImage("img/bullet.png");
-        sniperBullet = loadImage("img/laser.png");
-        tankBullet = loadImage("img/shell.png");
+        bolt = loadImage("img/bolt.png");
         explosion = new Animation(loadSpriteSheet("img/explosion.png", 32, 32));
         explosion.setRepeatAmount(1);
         explosion.setSpeed(2);
@@ -88,12 +115,17 @@ public class RTSGame extends Game {
             else if (dot.getY() > getHeight()) dot.setY(dot.getY() - getHeight());
         }
         
-        boolean allComplete = true;
-        for (Sprite ship : ships.getAll()) if (!((Ship) ship).turnComplete()) allComplete = false;
-        if (allComplete || keyEngaged(KeyEvent.VK_ENTER)) for (Sprite ship : ships.getAll()) ((Ship) ship).resetTurn();
-        
         stars.drawAll();
         centerPainterOn(prevPainter);
+        
+        boolean allComplete = true;
+        for (Sprite ship : ships[player].getAll()) if (!((Ship) ship).turnComplete()) allComplete = false;
+        if (allComplete || keyEngaged(KeyEvent.VK_ENTER)) {
+            for (Sprite ship : ships[0].getAll()) ((Ship) ship).resetTurn();
+            for (Sprite ship : ships[1].getAll()) ((Ship) ship).resetTurn();
+            player = player == 0? 1 : 0;
+            focusOnNextShip();
+        }
         
         if (keyEngaged(KeyEvent.VK_TAB)) focusOnNextShip();
         if (keyPressed(KeyEvent.VK_W)) translatePainter(0, PAN_SPEED);
@@ -101,11 +133,13 @@ public class RTSGame extends Game {
         if (keyPressed(KeyEvent.VK_A)) translatePainter(PAN_SPEED, 0);
         if (keyPressed(KeyEvent.VK_D)) translatePainter(-PAN_SPEED, 0);
         
-        bullets.drawAll();
-        ships.drawAll();
+        bullets[0].drawAll();
+        bullets[1].drawAll();
+        ships[0].drawAll();
+        ships[1].drawAll();
         
-        for (Sprite ship : ships.getAll()) ((Ship) ship).drawStats();
-        for (Sprite ship : ships.getAll()) if (((Ship) ship).selected) ((Ship) ship).drawMenu();
+        for (Sprite ship : ships[player].getAll()) ((Ship) ship).drawStats();
+        for (Sprite ship : ships[player].getAll()) if (((Ship) ship).selected) ((Ship) ship).drawMenu();
         
         prevPainter = getPainterCenter();
         centerPainterOn(getCenter());
@@ -114,7 +148,7 @@ public class RTSGame extends Game {
     
     static void focusOnNextShip() {
         boolean found = false, done = false;
-        for (Sprite sprite : RTSGame.ships.getAll()) {
+        for (Sprite sprite : RTSGame.ships[player].getAll()) {
             Ship ship = (Ship) sprite;
             if (!found && !done && ship.selected) {
                 ship.selected = false;
@@ -130,7 +164,7 @@ public class RTSGame extends Game {
         }
         
         if (!found || !done) {
-            for (Sprite sprite : RTSGame.ships.getAll()) {
+            for (Sprite sprite : RTSGame.ships[player].getAll()) {
                 Ship ship = (Ship) sprite;
                 if (ship.getTurns() > 0) {
                     ship.selected = true;
@@ -162,4 +196,29 @@ public class RTSGame extends Game {
         return (int) rect.getWidth();
     }
     
+    static BufferedImage teamColor(BufferedImage image, int team) {
+        if (team == 0) return image;
+        else return RTSGame.colorImage(image, new int[] {255, 0, 0}, new int[] {0, 0, 255});
+    }
+    
+    static BufferedImage colorImage(BufferedImage image, int[] old, int[] rep) {
+        ColorModel cm = image.getColorModel();
+        boolean al = cm.isAlphaPremultiplied();
+        WritableRaster ra = image.copyData(image.getRaster().createCompatibleWritableRaster());
+        BufferedImage copy = new BufferedImage(cm, ra, al, null);
+        
+        WritableRaster raster = copy.getRaster();
+        for (int x = 0; x < copy.getWidth(); x++) {
+            for (int y = 0; y < copy.getHeight(); y++) {
+                int[] pixels = raster.getPixel(x, y, (int[]) null);
+                if (pixels[0] == old[0] && pixels[1] == old[1] && pixels[2] == old[2]) {
+                    pixels[0] = rep[0];
+                    pixels[1] = rep[1];
+                    pixels[2] = rep[2];
+                }
+                raster.setPixel(x, y, pixels);
+            }
+        }
+        return copy;
+    }
 }

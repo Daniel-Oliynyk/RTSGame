@@ -7,12 +7,12 @@ import java.awt.Color;
 public class Sniper extends Ship {
     final int SNIPER_RANGE = 400;
     
-    public Sniper(double x, double y) {
-        super(x, y, 150, 2, loadImage("img/ship/sniper.png"));
-        shipInformation("Corvette", "Move", "Shoot", "Laser");
-        hp = 16;
+    public Sniper(double x, double y, int team) {
+        super(x, y, 150, 2, loadImage("img/ship/sniper.png"), team);
+        shipInformation("Destroyer", "Move", "Plasma Beam", "EMP Round");
+        health = 16;
     }
-
+    
     @Override
     protected void actionTwo() {
         shootRange(200);
@@ -29,9 +29,9 @@ public class Sniper extends Ship {
             painter().setColor(Color.CYAN);
             drawRangePointer(SNIPER_RANGE);
             if (click()) {
-                RTSGame.bullets.add(new Bullet(getCenter(), mouseConstraint(SNIPER_RANGE), RTSGame.sniperBullet));
+                shootBullet(getCenter(), mouseConstraint(SNIPER_RANGE), RTSGame.bolt, TEAM);
                 decreaseTurns(2);
-                en--;
+                energy -= 2;
             }
         }
     }
