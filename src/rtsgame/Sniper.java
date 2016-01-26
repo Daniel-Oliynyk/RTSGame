@@ -9,30 +9,24 @@ public class Sniper extends Ship {
     
     public Sniper(double x, double y, int team) {
         super(x, y, 150, 2, loadImage("img/ship/sniper.png"), team);
-        shipInformation("Destroyer", "Move", "Plasma Beam", "EMP Round");
+        shipInformation("Destroyer", "Movement", "Shield", "Plasma Beam", "EMP Round");
         health = 16;
     }
     
     @Override
-    protected void actionTwo() {
+    protected void actionThree() {
         shootRange(200);
     }
     
     @Override
-    protected void actionThree() {
-        if (getTurns() < 2) {
-            setMode(2);
-            actionTwo();
-        }
-        else {
+    protected void actionFour() {
             face(mouse());
-            painter().setColor(Color.CYAN);
+            painter().setColor(energy > 0 && getTurns() > 1? Color.CYAN : Color.GRAY);
             drawRangePointer(SNIPER_RANGE);
-            if (click()) {
+            if (click() && energy > 0 && getTurns() > 1) {
                 shootBullet(getCenter(), mouseConstraint(SNIPER_RANGE), RTSGame.bolt, TEAM);
                 decreaseTurns(2);
                 energy -= 2;
             }
-        }
     }
 }

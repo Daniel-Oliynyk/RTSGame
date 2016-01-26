@@ -8,13 +8,13 @@ public class Miner extends Ship {
 
     public Miner(double x, double y, int team) {
         super(x, y, 100, 3, loadImage("img/ship/miner.png"), team);
-        shipInformation("Mining Drone", "Move", "Harvest");
+        shipInformation("Mining Drone", "Movement", "Shield", "Harvest Beam");
         health = 8;
         energy = 4;
     }
     
     @Override
-    protected void actionTwo() {
+    protected void actionThree() {
         face(mouse());
         painter().setColor(Color.GREEN);
         drawRangePointer(50);

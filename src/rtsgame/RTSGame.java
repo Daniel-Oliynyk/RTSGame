@@ -17,7 +17,7 @@ import java.util.List;
 public class RTSGame extends Game {
     static final List<String> GLOBAL_ACTIONS = Arrays.asList("Cancel", "Pan Camera", "Next", "End Turn"),
             ACTION_KEYS = Arrays.asList("Esc", "W] [A] [S] [D", "Tab", "Enter");
-    static final int PAN_SPEED = 10;
+    static final int PAN_SPEED = 15;
     static int player = 0;
     static BufferedImage star, bullet, bolt;
     static Group[] ships, bullets;
@@ -121,22 +121,22 @@ public class RTSGame extends Game {
         boolean allComplete = true;
         for (Sprite ship : ships[player].getAll()) if (!((Ship) ship).turnComplete()) allComplete = false;
         if (allComplete || keyEngaged(KeyEvent.VK_ENTER)) {
-            for (Sprite ship : ships[0].getAll()) ((Ship) ship).resetTurn();
-            for (Sprite ship : ships[1].getAll()) ((Ship) ship).resetTurn();
             player = player == 0? 1 : 0;
+            bullets[player].clear(true);
+            for (Sprite ship : ships[player].getAll()) ((Ship) ship).resetTurn();
             focusOnNextShip();
         }
         
         if (keyEngaged(KeyEvent.VK_TAB)) focusOnNextShip();
-        if (keyPressed(KeyEvent.VK_W)) translatePainter(0, PAN_SPEED);
-        if (keyPressed(KeyEvent.VK_S)) translatePainter(0, -PAN_SPEED);
-        if (keyPressed(KeyEvent.VK_A)) translatePainter(PAN_SPEED, 0);
-        if (keyPressed(KeyEvent.VK_D)) translatePainter(-PAN_SPEED, 0);
+        if (keyPressed(KeyEvent.VK_W) || keyPressed(KeyEvent.VK_UP)) translatePainter(0, PAN_SPEED);
+        if (keyPressed(KeyEvent.VK_S) || keyPressed(KeyEvent.VK_DOWN)) translatePainter(0, -PAN_SPEED);
+        if (keyPressed(KeyEvent.VK_A) || keyPressed(KeyEvent.VK_LEFT)) translatePainter(PAN_SPEED, 0);
+        if (keyPressed(KeyEvent.VK_D) || keyPressed(KeyEvent.VK_RIGHT)) translatePainter(-PAN_SPEED, 0);
         
-        bullets[0].drawAll();
-        bullets[1].drawAll();
-        ships[0].drawAll();
-        ships[1].drawAll();
+        ships[(player + 1) % 2].drawAll();
+        ships[player].drawAll();
+        bullets[(player + 1) % 2].drawAll();
+        bullets[player].drawAll();
         
         for (Sprite ship : ships[player].getAll()) ((Ship) ship).drawStats();
         for (Sprite ship : ships[player].getAll()) if (((Ship) ship).selected) ((Ship) ship).drawMenu();
@@ -144,6 +144,8 @@ public class RTSGame extends Game {
         prevPainter = getPainterCenter();
         centerPainterOn(getCenter());
         drawActions();
+        painter().setColor(player == 0? Color.RED : Color.BLUE);
+        painter().drawString("Player " + (player + 1), (int) Game.getCenter().x() - stringWidth("Player " + (player + 1)) / 2, 40);
     }
     
     static void focusOnNextShip() {
