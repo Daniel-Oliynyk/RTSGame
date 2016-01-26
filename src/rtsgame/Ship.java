@@ -17,9 +17,9 @@ public class Ship extends Sprite {
     final Dimension ORIGINAL_SIZE;
     private int mode = 1, turns;
     int health = 24, energy = 8;
-    boolean selected, arrived = true;
+    boolean selected, arrived = true, shield = false;
     private String name = "Ship";
-    private List<String> actions = Arrays.asList("Move", "Plasma Beam");
+    private List<String> actions = Arrays.asList("Movement", "Shield", "Plasma Beam");
     Position moveLocation;
     
     public Ship(double x, double y, int range, int turns, BufferedImage image, int team) {
@@ -30,7 +30,7 @@ public class Ship extends Sprite {
         MOVE_RANGE = range;
         ORIGINAL_SIZE = new Dimension(image.getWidth(), image.getHeight());
         MAX_TURNS = turns < 1? 1 : turns;
-        resetTurn();
+        resetTurn(true);
         TEAM = team;
         ENEMY = team == 0? 1 : 0;
     }
@@ -74,15 +74,23 @@ public class Ship extends Sprite {
             moveLocation = mouseConstraint(MOVE_RANGE * turns, MOVE_RANGE);
             arrived = false;
             decreaseTurns((int) Math.ceil((getCenter().dist(moveLocation) - SNAP) / MOVE_RANGE));
-            mode = 2;
+            mode = 3;
         }
     }
     
     protected void actionTwo() {
-        shootRange(300);
+        face(mouse());
+        painter().setColor(energy > 0? Color.YELLOW : Color.GRAY);
+        drawRange(ORIGINAL_SIZE.width > 100? 75 : 50);
+        if (click()) {
+            shield = true;
+            decreaseTurns(turns);
+        }
     }
     
-    protected void actionThree() {}
+    protected void actionThree() {
+        shootRange(300);
+    }
     
     protected void actionFour() {}
     
@@ -91,22 +99,12 @@ public class Ship extends Sprite {
     protected void actionSix() {}
     
     protected final void shootRange(int range) {
-        shootRange(range, Color.RED, 1, 2);
-    }
-    
-    protected final void shootRange(int range, Color col, int turns, int alt) {
-        if (getTurns() < turns) {
-            setMode(alt);
-            selected();
-        }
-        else {
-            face(mouse());
-            painter().setColor(col);
-            drawRangePointer(range);
-            if (click()) {
-                shootBullet(getCenter(), mouseConstraint(range), TEAM);
-                decreaseTurns(turns);
-            }
+        face(mouse());
+        painter().setColor(Color.RED);
+        drawRangePointer(range);
+        if (click()) {
+            shootBullet(getCenter(), mouseConstraint(range), TEAM);
+            decreaseTurns(turns);
         }
     }
     
@@ -216,8 +214,14 @@ public class Ship extends Sprite {
         return turns < 1 && arrived;
     }
     
-    final void resetTurn() {
+    final void resetTurn(boolean next) {
         deselect();
+        if (shield && next) {
+            energy--;
+            if (energy < 0) energy = 0;
+            shield = false;
+            addMessage("-1", Color.CYAN, new Position(x, y + 20));
+        }
         turns = MAX_TURNS;
     }
     
@@ -246,5 +250,15 @@ public class Ship extends Sprite {
     
     final void shootBullet(Position center, Position target, BufferedImage image, int team) {
         bullets[team].add(new Bullet(center, target, image, team == 0? 1 : 0));
+    }
+    
+    @Override
+    public void draw(UpdateType type) {
+        super.draw(type);
+        if (shield) {
+            int radius = ORIGINAL_SIZE.width > 100? 128 : 64;
+            BufferedImage image = ORIGINAL_SIZE.width > 100? largeShield : smallShield;
+            painter().drawImage(image, (int) getCenter().x() - radius, (int) getCenter().y() - radius, null);
+        }
     }
 }
