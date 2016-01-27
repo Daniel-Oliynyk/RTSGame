@@ -29,7 +29,26 @@ public class Bullet extends Sprite {
         if (getAnimation().getAllFrames().length < 2) {
             moveTo(target);
             boolean collide = false;
-            if (RTSGame.ships[TEAM].getAllWithin(this).size() > 0) {
+            if (RTSGame.asteroids.getAllWithin(this).size() > 0) {
+                Asteroid asteroid = (Asteroid) RTSGame.asteroids.getAllWithin(this).get(0);
+                asteroid.health -= damage;
+                collide = true;
+                RTSGame.addMessage("-" + damage, Color.YELLOW, getCenter());
+                if (asteroid.health < 1) {
+                    asteroid.remove(true);
+                    Sprite explosion = new Sprite(RTSGame.explosionMedium);
+                    explosion.centerOn(asteroid);
+                    explosion.script(new Script() {
+                        @Override
+                        public void update() {
+                            if (explosion.getAnimation().isComplete()) explosion.remove(true);
+                        }
+                    });
+                    RTSGame.explosions.add(explosion);
+                }
+                
+            }
+            else if (RTSGame.ships[TEAM].getAllWithin(this).size() > 0) {
                 Ship ship = (Ship) RTSGame.ships[TEAM].getAllWithin(this).get(0);
                 int dmg = ship.shield? damage / 2 : damage;
                 ship.health -= dmg;
@@ -49,10 +68,7 @@ public class Bullet extends Sprite {
                 }
                 
             }
-            if (target.dist(getCenter()) < 1 || collide) {
-                setAnimation(new Animation(RTSGame.explosionSmall));
-                centerOn(target);
-            }
+            if (target.dist(getCenter()) < 1 || collide) setAnimation(new Animation(RTSGame.explosionSmall));
         }
         else if (getAnimation().isComplete()) remove(true);
     }

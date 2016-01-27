@@ -15,18 +15,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 public class RTSGame extends Game {
     static final List<String> GLOBAL_ACTIONS = Arrays.asList("Cancel", "Pan Camera", "Next", "End Turn"),
-            ACTION_KEYS = Arrays.asList("Esc", "W] [A] [S] [D", "Tab", "Enter");
+            ACTION_KEYS = Arrays.asList("Esc", "W] [A] [S] [D", "Tab", "Backspace");
     static final int PAN_SPEED = 15;
     static int player;
     static BufferedImage star, bullet, bolt, shieldSmall, shieldLarge;
     static Group[] ships, bullets;
-    static Group explosions;
+    static Group asteroids, explosions;
+    static Ship[] mothership;
     static Animation explosionSmall, explosionMedium, explosionLarge;
     static List<Message> overlay;
     static Position prevPainter;
+    static Random ran;
     private Group stars;
     private int starCooldown;
     
@@ -45,15 +48,50 @@ public class RTSGame extends Game {
     
     @Override
     protected void setup() {
+        ran = new Random();
         player = 0;
         prevPainter = getPainterCenter();
+        
+        //<editor-fold defaultstate="collapsed" desc="Asteroid Spawning">
+        asteroids = new Group();
+        asteroids.add(new Asteroid(-100, 350, ran.nextInt(3), 3));
+        asteroids.add(new Asteroid(-100, 450, ran.nextInt(3), 3));
+        
+        asteroids.add(new Asteroid(900, 100, ran.nextInt(3), ran.nextInt(3) + 1));
+        asteroids.add(new Asteroid(900, 200, ran.nextInt(3), ran.nextInt(3) + 1));
+        asteroids.add(new Asteroid(900, 300, ran.nextInt(3), ran.nextInt(3) + 1));
+        asteroids.add(new Asteroid(900, 400, ran.nextInt(3), ran.nextInt(3) + 1));
+        asteroids.add(new Asteroid(900, 500, ran.nextInt(3), ran.nextInt(3) + 1));
+        asteroids.add(new Asteroid(900, 600, ran.nextInt(3), ran.nextInt(3) + 1));
+        asteroids.add(new Asteroid(900, 700, ran.nextInt(3), ran.nextInt(3) + 1));
+        
+        asteroids.add(new Asteroid(1000, 150, ran.nextInt(3), ran.nextInt(3) + 1));
+        asteroids.add(new Asteroid(1000, 250, ran.nextInt(3), ran.nextInt(3) + 1));
+        asteroids.add(new Asteroid(1000, 350, ran.nextInt(3), ran.nextInt(3) + 1));
+        asteroids.add(new Asteroid(1000, 450, ran.nextInt(3), ran.nextInt(3) + 1));
+        asteroids.add(new Asteroid(1000, 550, ran.nextInt(3), ran.nextInt(3) + 1));
+        asteroids.add(new Asteroid(1000, 650, ran.nextInt(3), ran.nextInt(3) + 1));
+        
+        asteroids.add(new Asteroid(1100, 100, ran.nextInt(3), ran.nextInt(3) + 1));
+        asteroids.add(new Asteroid(1100, 200, ran.nextInt(3), ran.nextInt(3) + 1));
+        asteroids.add(new Asteroid(1100, 300, ran.nextInt(3), ran.nextInt(3) + 1));
+        asteroids.add(new Asteroid(1100, 400, ran.nextInt(3), ran.nextInt(3) + 1));
+        asteroids.add(new Asteroid(1100, 500, ran.nextInt(3), ran.nextInt(3) + 1));
+        asteroids.add(new Asteroid(1100, 600, ran.nextInt(3), ran.nextInt(3) + 1));
+        asteroids.add(new Asteroid(1100, 700, ran.nextInt(3), ran.nextInt(3) + 1));
+        
+        asteroids.add(new Asteroid(2100, 350, ran.nextInt(3), 3));
+        asteroids.add(new Asteroid(2100, 450, ran.nextInt(3), 3));
+        //</editor-fold>
         
         bullets = new Group[2];
         bullets[0] = new Group();
         bullets[1] = new Group();
         
-        //<editor-fold defaultstate="collapsed" desc="Spawn Positions">
+        //<editor-fold defaultstate="collapsed" desc="Ship Spawning">
         ships = new Group[2];
+        mothership = new Ship[2];
+        
         ships[0] = new Group();
         ships[1] = new Group();
         
@@ -61,7 +99,8 @@ public class RTSGame extends Game {
         ships[0].add(new Miner(100, 450, 0));
         
         ships[0].add(new Battlecruiser(250, 250, 0));
-        ships[0].add(new Mothership(250, 400, 0));
+        mothership[0] = new Mothership(250, 400, 0);
+        ships[0].add(mothership[0]);
         ships[0].add(new Battlecruiser(250, 550, 0));
         
         ships[0].add(new Medic(400, 250, 0));
@@ -76,7 +115,8 @@ public class RTSGame extends Game {
         ships[1].add(new Miner(1900, 450, 1));
         
         ships[1].add(new Battlecruiser(1750, 250, 1));
-        ships[1].add(new Mothership(1750, 400, 1));
+        mothership[1] = new Mothership(1750, 400, 1);
+        ships[1].add(mothership[1]);
         ships[1].add(new Battlecruiser(1750, 550, 1));
         
         ships[1].add(new Medic(1600, 250, 1));
@@ -139,7 +179,7 @@ public class RTSGame extends Game {
         
         boolean allComplete = true;
         for (Sprite ship : ships[player].getAll()) if (!((Ship) ship).turnComplete()) allComplete = false;
-        if (allComplete || keyEngaged(KeyEvent.VK_ENTER)) {
+        if (allComplete || keyEngaged(KeyEvent.VK_BACK_SPACE)) {
             for (Sprite ship : ships[player].getAll()) ((Ship) ship).resetTurn(false);
             player = player == 0? 1 : 0;
             bullets[player].clear(true);
@@ -153,6 +193,7 @@ public class RTSGame extends Game {
         if (keyPressed(KeyEvent.VK_A) || keyPressed(KeyEvent.VK_LEFT)) translatePainter(PAN_SPEED, 0);
         if (keyPressed(KeyEvent.VK_D) || keyPressed(KeyEvent.VK_RIGHT)) translatePainter(-PAN_SPEED, 0);
         
+        asteroids.drawAll();
         explosions.drawAll();
         ships[(player + 1) % 2].drawAll();
         ships[player].drawAll();

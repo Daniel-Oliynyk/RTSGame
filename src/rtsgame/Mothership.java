@@ -13,7 +13,7 @@ public class Mothership extends Ship {
         setSpeed(3);
         shipInformation("Mothership", "Movement", "Shield", "Plasma Turrets", "Charge Beam");
         health = 72;
-        energy = 16;
+        energy = 6;
     }
 
     @Override
@@ -33,14 +33,14 @@ public class Mothership extends Ship {
         face(mouse());
         painter().setColor(energy > 0? Color.CYAN : Color.GRAY);
         drawRangePointer(CHARGE_RANGE);
-        if (click() && energy > 0) {
+        if (click() && energy > 3) {
             if (RTSGame.ships[TEAM].isWithin(mouseConstraint(CHARGE_RANGE)) && !Game.mouseWithin(this)) {
                 ((Ship) RTSGame.ships[TEAM].getAllWithin(mouseConstraint(CHARGE_RANGE)).get(0)).energy += 4;
                 RTSGame.addMessage("-4", Color.CYAN, getCenter());
                 RTSGame.addMessage("+4", Color.CYAN, mouseConstraint(CHARGE_RANGE));
                 energy -= 4;
+                decreaseTurns(1);
             }
-            decreaseTurns(1);
         }
     }
 }

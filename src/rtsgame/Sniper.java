@@ -21,7 +21,7 @@ public class Sniper extends Ship {
     @Override
     protected void actionFour() {
         face(mouse());
-        painter().setColor(energy > 0 && getTurns() > 1? Color.CYAN : Color.GRAY);
+        painter().setColor(energy > 1 && getTurns() > 1? Color.CYAN : Color.GRAY);
         drawRangePointer(SNIPER_RANGE);
         if (click() && energy > 0 && getTurns() > 1) {
             shootBullet(18, getCenter(), mouseConstraint(SNIPER_RANGE), RTSGame.bolt, TEAM);
