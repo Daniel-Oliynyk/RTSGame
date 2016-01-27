@@ -2,7 +2,6 @@ package rtsgame;
 
 import gametools.Game;
 import static gametools.Game.painter;
-import gametools.Position;
 import static gametools.Tools.*;
 import java.awt.Color;
 
@@ -24,7 +23,7 @@ public class Medic extends Ship {
                 ((Ship) RTSGame.ships[TEAM].getAllWithin(mouseConstraint(HEAL_RANGE)).get(0)).health += 4;
                 energy--;
                 RTSGame.addMessage("+15", Color.GREEN, mouseConstraint(HEAL_RANGE));
-                RTSGame.addMessage("-1", Color.CYAN, new Position(x, y));
+                RTSGame.addMessage("-1", Color.CYAN, getCenter());
                 decreaseTurns(1);
             }
         }
@@ -36,7 +35,7 @@ public class Medic extends Ship {
         painter().setColor(getTurns() > 1? Color.RED : Color.GRAY);
         drawRangePointer(200);
         if (click() && getTurns() > 1) {
-            shootBullet(getCenter(), mouseConstraint(200), TEAM);
+            shootBullet(8, getCenter(), mouseConstraint(200), TEAM);
             decreaseTurns(2);
         }
     }

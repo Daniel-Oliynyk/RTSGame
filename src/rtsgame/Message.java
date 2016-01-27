@@ -5,10 +5,11 @@ import gametools.Position;
 import java.awt.Color;
 
 public class Message {
+    static final int DURATION = 60;
     final String message;
     final Color color;
-    final Position location;
-    int countDown = 60;
+    Position location;
+    int countDown = DURATION;
     boolean remove = false;
     
     public Message(String message, Color color, Position location) {
@@ -18,9 +19,10 @@ public class Message {
     }
     
     public void draw() {
-        Game.painter().setColor(color);
+        Game.painter().setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), (255 / DURATION) * countDown));
         Game.painter().drawString(message, (int) location.x() - RTSGame.stringWidth(message) / 2, (int) location.y());
         countDown--;
+        location.iy(-2);
         if (countDown < 0) remove = true;
     }
 }

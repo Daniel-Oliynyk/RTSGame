@@ -90,7 +90,7 @@ public class Ship extends Sprite {
     }
     
     protected void actionThree() {
-        shootRange(300);
+        shootRange(300, 10);
     }
     
     protected void actionFour() {}
@@ -99,12 +99,12 @@ public class Ship extends Sprite {
     
     protected void actionSix() {}
     
-    protected final void shootRange(int range) {
+    protected final void shootRange(int range, int dmg) {
         face(mouse());
         painter().setColor(Color.RED);
         drawRangePointer(range);
         if (click()) {
-            shootBullet(getCenter(), mouseConstraint(range), TEAM);
+            shootBullet(dmg, getCenter(), mouseConstraint(range), TEAM);
             decreaseTurns(1);
         }
     }
@@ -221,7 +221,7 @@ public class Ship extends Sprite {
             energy--;
             if (energy < 0) energy = 0;
             shield = false;
-            addMessage("-1", Color.CYAN, new Position(x, y + 20));
+            addMessage("-1", Color.CYAN, getCenter());
         }
         turns = MAX_TURNS;
     }
@@ -245,12 +245,13 @@ public class Ship extends Sprite {
             deselect();
         }
     }
-    final void shootBullet(Position center, Position target, int team) {
-        bullets[team].add(new Bullet(center, target, team == 0? 1 : 0));
+    
+    final void shootBullet(int dmg, Position cen, Position target, int team) {
+        bullets[team].add(new Bullet(dmg, cen, target, team == 0? 1 : 0));
     }
     
-    final void shootBullet(Position center, Position target, BufferedImage image, int team) {
-        bullets[team].add(new Bullet(center, target, image, team == 0? 1 : 0));
+    final void shootBullet(int dmg, Position cen, Position target, BufferedImage image, int team) {
+        bullets[team].add(new Bullet(dmg, cen, target, image, team == 0? 1 : 0));
     }
     
     @Override
@@ -258,7 +259,7 @@ public class Ship extends Sprite {
         super.draw(type);
         if (shield) {
             int radius = ORIGINAL_SIZE.width > 100? 128 : 64;
-            BufferedImage image = ORIGINAL_SIZE.width > 100? largeShield : smallShield;
+            BufferedImage image = ORIGINAL_SIZE.width > 100? shieldLarge : shieldSmall;
             painter().drawImage(image, (int) getCenter().x() - radius, (int) getCenter().y() - radius, null);
         }
     }

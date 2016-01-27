@@ -21,13 +21,14 @@ public class RTSGame extends Game {
             ACTION_KEYS = Arrays.asList("Esc", "W] [A] [S] [D", "Tab", "Enter");
     static final int PAN_SPEED = 15;
     static int player;
-    static BufferedImage star, bullet, bolt, smallShield, largeShield;
+    static BufferedImage star, bullet, bolt, shieldSmall, shieldLarge;
     static Group[] ships, bullets;
-    static Animation explosion;
+    static Group explosions;
+    static Animation explosionSmall, explosionMedium, explosionLarge;
     static List<Message> overlay;
+    static Position prevPainter;
     private Group stars;
-    int starCooldown;
-    Position prevPainter;
+    private int starCooldown;
     
     public static void main(String[] args) {
         initialize(RTSGame.class);
@@ -87,17 +88,25 @@ public class RTSGame extends Game {
         ships[1].add(new Fighter(1450, 550, 1));
         
         for (Sprite ship : ships[1].getAll()) ship.setAngle(Math.PI);
-//</editor-fold>
+        //</editor-fold>
         
         star = loadImage("img/star.png");
         bullet = loadImage("img/bullet.png");
         bolt = loadImage("img/bolt.png");
-        smallShield = loadImage("img/smallshield.png");
-        largeShield = loadImage("img/bigshield.png");
+        shieldSmall = loadImage("img/shield-small.png");
+        shieldLarge = loadImage("img/shield-large.png");
         
-        explosion = new Animation(loadSpriteSheet("img/explosion.png", 32, 32));
-        explosion.setRepeatAmount(1);
-        explosion.setSpeed(2);
+        //<editor-fold defaultstate="collapsed" desc="Explosion Animations">
+        explosionSmall = new Animation(loadSpriteSheet("img/explosion-small.png", 32, 32));
+        explosionSmall.setRepeatAmount(1);
+        explosionSmall.setSpeed(2);
+        explosionMedium = new Animation(loadSpriteSheet("img/explosion-medium.png", 64, 64));
+        explosionMedium.setRepeatAmount(1);
+        explosionMedium.setSpeed(2);
+        explosionLarge = new Animation(loadSpriteSheet("img/explosion-large.png", 128, 128));
+        explosionLarge.setRepeatAmount(1);
+        explosionLarge.setSpeed(2);
+        //</editor-fold>
         
         stars = new Group();
         for (int i = 0; i < 200; i++) stars.add(new Sprite(randomPosition(getArea()), star));
@@ -106,6 +115,7 @@ public class RTSGame extends Game {
         Font large = new Font("Arial", Font.PLAIN, 16);
         painter().setFont(large);
         
+        explosions = new Group();
         overlay = new ArrayList<>();
     }
     
@@ -143,6 +153,7 @@ public class RTSGame extends Game {
         if (keyPressed(KeyEvent.VK_A) || keyPressed(KeyEvent.VK_LEFT)) translatePainter(PAN_SPEED, 0);
         if (keyPressed(KeyEvent.VK_D) || keyPressed(KeyEvent.VK_RIGHT)) translatePainter(-PAN_SPEED, 0);
         
+        explosions.drawAll();
         ships[(player + 1) % 2].drawAll();
         ships[player].drawAll();
         bullets[(player + 1) % 2].drawAll();
